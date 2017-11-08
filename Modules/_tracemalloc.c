@@ -43,7 +43,11 @@ static struct {
     /* use domain in trace key?
        Variable protected by the GIL. */
     int use_domain;
-} tracemalloc_config = {TRACEMALLOC_NOT_INITIALIZED, 0, 1, 0};
+
+    /* max alloc memory. */
+    int max_malloc_size;
+
+} tracemalloc_config = {TRACEMALLOC_NOT_INITIALIZED, 0, 1, 0, 1024*1024};
 
 #if defined(TRACE_RAW_MALLOC) && defined(WITH_THREAD)
 /* This lock is needed because tracemalloc_free() is called without
@@ -119,6 +123,8 @@ typedef struct {
 /* Size in bytes of currently traced memory.
    Protected by TABLES_LOCK(). */
 static size_t tracemalloc_traced_memory = 0;
+
+static int tracemalloc_is_out_off_memory = 0;
 
 /* Peak size in bytes of traced memory.
    Protected by TABLES_LOCK(). */
@@ -659,6 +665,7 @@ tracemalloc_add_trace(_PyTraceMalloc_domain_t domain, uintptr_t ptr,
     }
 
     assert(tracemalloc_traced_memory <= SIZE_MAX - size);
+
     tracemalloc_traced_memory += size;
     if (tracemalloc_traced_memory > tracemalloc_peak_traced_memory)
         tracemalloc_peak_traced_memory = tracemalloc_traced_memory;
@@ -669,6 +676,20 @@ tracemalloc_add_trace(_PyTraceMalloc_domain_t domain, uintptr_t ptr,
             tracemalloc_add_trace(DEFAULT_DOMAIN, (uintptr_t)(ptr), size)
 
 
+static int notice = 0;
+
+int memory_run_out(void) {
+   if (tracemalloc_is_out_off_memory) {
+      if (!notice) {
+         notice = 1;
+         return 1;
+      }
+   } else {
+      notice = 0;
+   }
+   return 0;
+}
+
 static void*
 tracemalloc_alloc(int use_calloc, void *ctx, size_t nelem, size_t elsize)
 {
@@ -676,6 +697,15 @@ tracemalloc_alloc(int use_calloc, void *ctx, size_t nelem, size_t elsize)
     void *ptr;
 
     assert(elsize == 0 || nelem <= SIZE_MAX / elsize);
+
+    if (nelem * elsize > 1024*100) {
+       printf("large memory malloc detect :%d\n", nelem * elsize);
+       return NULL;
+    }
+
+    if (tracemalloc_traced_memory + nelem * elsize >= tracemalloc_config.max_malloc_size) {
+       tracemalloc_is_out_off_memory = 1;
+    }
 
     if (use_calloc)
         ptr = alloc->calloc(alloc->ctx, nelem, elsize);
@@ -1097,6 +1127,8 @@ tracemalloc_start(int max_nframe)
         /* hook already installed: do nothing */
         return 0;
     }
+
+    tracemalloc_is_out_off_memory = 0;
 
     assert(1 <= max_nframe && max_nframe <= MAX_NFRAME);
     tracemalloc_config.max_nframe = max_nframe;
@@ -1566,6 +1598,54 @@ py_tracemalloc_get_traceback_limit(PyObject *self)
 }
 
 
+PyDoc_STRVAR(tracemalloc_is_out_off_memory_doc,
+    "is_out_off_memory() -> int\n"
+    "\n"
+    "Check whether memory is out off use\n");
+
+static PyObject*
+py_tracemalloc_is_out_off_memory(PyObject *self)
+{
+    return PyLong_FromLong(tracemalloc_is_out_off_memory);
+}
+
+
+
+PyDoc_STRVAR(tracemalloc_set_max_malloc_size_doc,
+    "get_max_malloc_size() -> int\n"
+    "\n"
+    "Set the maximum size of memory allow to malloc\n" );
+
+static PyObject*
+py_tracemalloc_set_max_malloc_size(PyObject *self, PyObject *args)
+{
+    Py_ssize_t nsize = 1;
+
+    if (!PyArg_ParseTuple(args, "|n:start", &nsize))
+        return NULL;
+
+    if (nsize < 0) {
+        PyErr_Format(PyExc_ValueError, "memory size must > 0");
+        return NULL;
+    }
+
+    tracemalloc_config.max_malloc_size  = nsize;
+
+    Py_RETURN_NONE;
+}
+
+
+PyDoc_STRVAR(tracemalloc_get_max_malloc_size_doc,
+    "get_max_malloc_size() -> int\n"
+    "\n"
+    "Get the maximum size of memory allow to malloc\n" );
+
+static PyObject*
+py_tracemalloc_get_max_malloc_size(PyObject *self)
+{
+    return PyLong_FromLong(tracemalloc_config.max_malloc_size);
+}
+
 PyDoc_STRVAR(tracemalloc_get_tracemalloc_memory_doc,
     "get_tracemalloc_memory() -> int\n"
     "\n"
@@ -1631,7 +1711,13 @@ static PyMethodDef module_methods[] = {
       METH_NOARGS, tracemalloc_stop_doc},
     {"get_traceback_limit", (PyCFunction)py_tracemalloc_get_traceback_limit,
      METH_NOARGS, tracemalloc_get_traceback_limit_doc},
-    {"get_tracemalloc_memory", (PyCFunction)tracemalloc_get_tracemalloc_memory,
+     {"set_max_malloc_size", (PyCFunction)py_tracemalloc_set_max_malloc_size,
+      METH_NOARGS, tracemalloc_set_max_malloc_size_doc},
+     {"get_max_malloc_size", (PyCFunction)py_tracemalloc_get_max_malloc_size,
+      METH_NOARGS, tracemalloc_get_max_malloc_size_doc},
+      {"is_out_off_memory", (PyCFunction)py_tracemalloc_is_out_off_memory,
+       METH_NOARGS, tracemalloc_is_out_off_memory_doc},
+      {"get_tracemalloc_memory", (PyCFunction)tracemalloc_get_tracemalloc_memory,
      METH_NOARGS, tracemalloc_get_tracemalloc_memory_doc},
     {"get_traced_memory", (PyCFunction)tracemalloc_get_traced_memory,
      METH_NOARGS, tracemalloc_get_traced_memory_doc},

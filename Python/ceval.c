@@ -753,6 +753,8 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
     return tstate->interp->eval_frame(f, throwflag);
 }
 
+extern int memory_run_out(void);
+
 PyObject *
 _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 {
@@ -852,7 +854,12 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 
 #define DISPATCH() \
     { \
-        if (!_Py_atomic_load_relaxed(&eval_breaker)) {      \
+      if (memory_run_out()) { \
+         printf("++++++++++memory out! exit_eval_frame\n"); \
+         PyErr_Format(PyExc_RuntimeError, "memory run out!!!"); \
+             goto exit_eval_frame; \
+      } \
+       if (!_Py_atomic_load_relaxed(&eval_breaker)) {      \
                     FAST_DISPATCH(); \
         } \
         continue; \
