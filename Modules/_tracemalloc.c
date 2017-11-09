@@ -47,7 +47,10 @@ static struct {
     /* max alloc memory. */
     int max_malloc_size;
 
-} tracemalloc_config = {TRACEMALLOC_NOT_INITIALIZED, 0, 1, 0, 1024*1024};
+    /* max execution time in microsecond. */
+    int max_execution_time;
+
+} tracemalloc_config = {TRACEMALLOC_NOT_INITIALIZED, 0, 1, 0, 1024*1024 ,100*1000};
 
 #if defined(TRACE_RAW_MALLOC) && defined(WITH_THREAD)
 /* This lock is needed because tracemalloc_free() is called without
@@ -690,6 +693,30 @@ int memory_run_out(void) {
    return 0;
 }
 
+static long long start_time = 0;
+
+long long get_milliseconds() {
+   struct timeval  tv;
+   gettimeofday(&tv, NULL);
+   return tv.tv_sec * 1000000LL + tv.tv_usec * 1LL ;
+}
+
+int time_out(void) {
+   struct timeval  tv;
+   gettimeofday(&tv, NULL);
+   long long time_now = tv.tv_sec * 1000000LL + tv.tv_usec ;
+
+   if (!start_time) {
+      return 0;
+   }
+
+   if (time_now - start_time >= tracemalloc_config.max_execution_time ) {
+      start_time = 0;
+      return 1;
+   }
+   return 0;
+}
+
 static void*
 tracemalloc_alloc(int use_calloc, void *ctx, size_t nelem, size_t elsize)
 {
@@ -699,7 +726,7 @@ tracemalloc_alloc(int use_calloc, void *ctx, size_t nelem, size_t elsize)
     assert(elsize == 0 || nelem <= SIZE_MAX / elsize);
 
     if (nelem * elsize > 1024*100) {
-       printf("large memory malloc detect :%d\n", nelem * elsize);
+       printf("large memory malloc detect :%ld\n", nelem * elsize);
        return NULL;
     }
 
@@ -1194,6 +1221,7 @@ tracemalloc_stop(void)
     /* release memory */
     raw_free(tracemalloc_traceback);
     tracemalloc_traceback = NULL;
+    start_time = 0;
 }
 
 PyDoc_STRVAR(tracemalloc_is_tracing_doc,
@@ -1564,6 +1592,8 @@ py_tracemalloc_start(PyObject *self, PyObject *args)
     if (tracemalloc_start(nframe_int) < 0)
         return NULL;
 
+    start_time = get_milliseconds();
+
     Py_RETURN_NONE;
 }
 
@@ -1612,7 +1642,7 @@ py_tracemalloc_is_out_off_memory(PyObject *self)
 
 
 PyDoc_STRVAR(tracemalloc_set_max_malloc_size_doc,
-    "get_max_malloc_size() -> int\n"
+    "set_max_malloc_size() -> int\n"
     "\n"
     "Set the maximum size of memory allow to malloc\n" );
 
@@ -1621,7 +1651,7 @@ py_tracemalloc_set_max_malloc_size(PyObject *self, PyObject *args)
 {
     Py_ssize_t nsize = 1;
 
-    if (!PyArg_ParseTuple(args, "|n:start", &nsize))
+    if (!PyArg_ParseTuple(args, "|n:set_max_malloc_size", &nsize))
         return NULL;
 
     if (nsize < 0) {
@@ -1645,6 +1675,44 @@ py_tracemalloc_get_max_malloc_size(PyObject *self)
 {
     return PyLong_FromLong(tracemalloc_config.max_malloc_size);
 }
+
+
+
+PyDoc_STRVAR(tracemalloc_set_max_execution_time_doc,
+    "set_max_execution_time() -> int\n"
+    "\n"
+    "Set the maximum execution time for smart contracts\n" );
+
+static PyObject*
+py_tracemalloc_set_max_execution_time(PyObject *self, PyObject *args)
+{
+    Py_ssize_t nsize = 1;
+
+    if (!PyArg_ParseTuple(args, "|n:set_max_execution_time", &nsize))
+        return NULL;
+
+    if (nsize < 0) {
+        PyErr_Format(PyExc_ValueError, "execution time must > 0");
+        return NULL;
+    }
+
+    tracemalloc_config.max_execution_time  = nsize;
+
+    Py_RETURN_NONE;
+}
+
+
+PyDoc_STRVAR(tracemalloc_get_max_execution_time_doc,
+    "get_max_execution_time() -> int\n"
+    "\n"
+    "Get the max execution time\n" );
+
+static PyObject*
+py_tracemalloc_get_max_execution_time(PyObject *self)
+{
+    return PyLong_FromLong(tracemalloc_config.max_execution_time);
+}
+
 
 PyDoc_STRVAR(tracemalloc_get_tracemalloc_memory_doc,
     "get_tracemalloc_memory() -> int\n"
@@ -1712,9 +1780,13 @@ static PyMethodDef module_methods[] = {
     {"get_traceback_limit", (PyCFunction)py_tracemalloc_get_traceback_limit,
      METH_NOARGS, tracemalloc_get_traceback_limit_doc},
      {"set_max_malloc_size", (PyCFunction)py_tracemalloc_set_max_malloc_size,
-      METH_NOARGS, tracemalloc_set_max_malloc_size_doc},
+     METH_VARARGS, tracemalloc_set_max_malloc_size_doc},
      {"get_max_malloc_size", (PyCFunction)py_tracemalloc_get_max_malloc_size,
       METH_NOARGS, tracemalloc_get_max_malloc_size_doc},
+      {"set_max_execution_time", (PyCFunction)py_tracemalloc_set_max_execution_time,
+      METH_VARARGS, tracemalloc_set_max_execution_time_doc},
+      {"get_max_execution_time", (PyCFunction)py_tracemalloc_get_max_execution_time,
+       METH_NOARGS, tracemalloc_get_max_execution_time_doc},
       {"is_out_off_memory", (PyCFunction)py_tracemalloc_is_out_off_memory,
        METH_NOARGS, tracemalloc_is_out_off_memory_doc},
       {"get_tracemalloc_memory", (PyCFunction)tracemalloc_get_tracemalloc_memory,

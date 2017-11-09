@@ -754,6 +754,7 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
 }
 
 extern int memory_run_out(void);
+extern int time_out(void);
 
 PyObject *
 _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
@@ -854,6 +855,11 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 
 #define DISPATCH() \
     { \
+      if (time_out()) { \
+         printf("++++++++++time out! exit_eval_frame\n"); \
+         PyErr_Format(PyExc_RuntimeError, "time out!!!"); \
+         goto exit_eval_frame; \
+      } \
       if (memory_run_out()) { \
          printf("++++++++++memory out! exit_eval_frame\n"); \
          PyErr_Format(PyExc_RuntimeError, "memory run out!!!"); \
