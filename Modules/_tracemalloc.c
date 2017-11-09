@@ -681,7 +681,7 @@ tracemalloc_add_trace(_PyTraceMalloc_domain_t domain, uintptr_t ptr,
 
 static int notice = 0;
 
-int memory_run_out(void) {
+static int memory_run_out(void) {
    if (tracemalloc_is_out_off_memory) {
       if (!notice) {
          notice = 1;
@@ -701,7 +701,7 @@ long long get_milliseconds() {
    return tv.tv_sec * 1000000LL + tv.tv_usec * 1LL ;
 }
 
-int time_out(void) {
+static int time_out(void) {
    struct timeval  tv;
    gettimeofday(&tv, NULL);
    long long time_now = tv.tv_sec * 1000000LL + tv.tv_usec ;
@@ -716,6 +716,28 @@ int time_out(void) {
    }
    return 0;
 }
+
+
+static int exit_eval_frame_check(void) {
+   if (time_out()) {
+      printf("++++++++++time out! exit_eval_frame\n");
+      PyErr_Format(PyExc_RuntimeError, "time out!!!");
+      return 1;
+   }
+   if (memory_run_out()) {
+      printf("++++++++++memory out! exit_eval_frame\n");
+      PyErr_Format(PyExc_RuntimeError, "memory run out!!!");
+      return 1;
+   }
+   return 0;
+}
+
+typedef int (*fn_check)(void);
+
+static fn_check old_check = NULL;
+
+extern fn_check set_exit_eval_frame_check(fn_check func);
+
 
 static void*
 tracemalloc_alloc(int use_calloc, void *ctx, size_t nelem, size_t elsize)
@@ -1196,6 +1218,8 @@ tracemalloc_start(int max_nframe)
     /* everything is ready: start tracing Python memory allocations */
     tracemalloc_config.tracing = 1;
 
+    old_check = set_exit_eval_frame_check((void*)exit_eval_frame_check);
+
     return 0;
 }
 
@@ -1222,6 +1246,8 @@ tracemalloc_stop(void)
     raw_free(tracemalloc_traceback);
     tracemalloc_traceback = NULL;
     start_time = 0;
+    set_exit_eval_frame_check(old_check);
+
 }
 
 PyDoc_STRVAR(tracemalloc_is_tracing_doc,

@@ -753,8 +753,16 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
     return tstate->interp->eval_frame(f, throwflag);
 }
 
-extern int memory_run_out(void);
-extern int time_out(void);
+typedef int (*fn_check)(void);
+
+static fn_check exit_eval_frame_check = NULL;
+
+fn_check set_exit_eval_frame_check(fn_check func) {
+   fn_check old = exit_eval_frame_check;
+   exit_eval_frame_check = func;
+   return old;
+}
+
 
 PyObject *
 _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
@@ -855,17 +863,10 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 
 #define DISPATCH() \
     { \
-      if (time_out()) { \
-         printf("++++++++++time out! exit_eval_frame\n"); \
-         PyErr_Format(PyExc_RuntimeError, "time out!!!"); \
-         goto exit_eval_frame; \
-      } \
-      if (memory_run_out()) { \
-         printf("++++++++++memory out! exit_eval_frame\n"); \
-         PyErr_Format(PyExc_RuntimeError, "memory run out!!!"); \
-             goto exit_eval_frame; \
-      } \
-       if (!_Py_atomic_load_relaxed(&eval_breaker)) {      \
+    if (exit_eval_frame_check && exit_eval_frame_check()) { \
+       goto exit_eval_frame; \
+    } \
+    if (!_Py_atomic_load_relaxed(&eval_breaker)) {      \
                     FAST_DISPATCH(); \
         } \
         continue; \
@@ -874,7 +875,10 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 #ifdef LLTRACE
 #define FAST_DISPATCH() \
     { \
-        if (!lltrace && !_Py_TracingPossible && !PyDTrace_LINE_ENABLED()) { \
+    if (exit_eval_frame_check && exit_eval_frame_check()) { \
+        goto exit_eval_frame; \
+    } \
+    if (!lltrace && !_Py_TracingPossible && !PyDTrace_LINE_ENABLED()) { \
             f->f_lasti = INSTR_OFFSET(); \
             NEXTOPARG(); \
             goto *opcode_targets[opcode]; \
@@ -884,7 +888,10 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 #else
 #define FAST_DISPATCH() \
     { \
-        if (!_Py_TracingPossible && !PyDTrace_LINE_ENABLED()) { \
+    if (exit_eval_frame_check && exit_eval_frame_check()) { \
+       goto exit_eval_frame; \
+    } \
+    if (!_Py_TracingPossible && !PyDTrace_LINE_ENABLED()) { \
             f->f_lasti = INSTR_OFFSET(); \
             NEXTOPARG(); \
             goto *opcode_targets[opcode]; \
