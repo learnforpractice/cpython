@@ -100,3 +100,8 @@ Tools/ssl/amd64
 Tools/ssl/win32
 .vs/
 .vscode/
+/Debug/
+.cproject
+.project
+.pydevproject
+.settings/
