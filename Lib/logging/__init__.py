@@ -1885,7 +1885,18 @@ def warn(msg, *args, **kwargs):
         "use 'warning' instead", DeprecationWarning, 2)
     warning(msg, *args, **kwargs)
 
-def info(msg, *args, **kwargs):
+FORMAT = "%(lineno)04s  %(message)s"
+basicConfig(format=FORMAT,level=INFO)
+
+def info(*args, sep=' '):
+    if len(root.handlers) == 0:
+        basicConfig()
+#    root.info(msg)
+    if root.isEnabledFor(INFO):
+        msg = sep.join("{}".format(a) for a in args)
+        root._log(INFO, msg, None)
+
+def info_(msg, *args, **kwargs):
     """
     Log a message with severity 'INFO' on the root logger. If the logger has
     no handlers, call basicConfig() to add a console handler with a pre-defined
