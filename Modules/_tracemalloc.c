@@ -747,7 +747,7 @@ tracemalloc_alloc(int use_calloc, void *ctx, size_t nelem, size_t elsize)
 
     assert(elsize == 0 || nelem <= SIZE_MAX / elsize);
 
-    if (nelem * elsize > 1024*100) {
+    if (nelem * elsize > 1024*500) {
        printf("large memory malloc detect :%ld\n", nelem * elsize);
        return NULL;
     }
