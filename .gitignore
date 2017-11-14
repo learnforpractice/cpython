@@ -105,3 +105,4 @@ Tools/ssl/win32
 .project
 .pydevproject
 .settings/
+dist
