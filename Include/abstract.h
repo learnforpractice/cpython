@@ -5,10 +5,10 @@ extern "C" {
 #endif
 
 #ifdef PY_SSIZE_T_CLEAN
-#define PyObject_CallFunction _PyObject_CallFunction_SizeT
-#define PyObject_CallMethod _PyObject_CallMethod_SizeT
+#define tiny_PyObject_CallFunction _PyObject_CallFunction_SizeT
+#define tiny_PyObject_CallMethod _PyObject_CallMethod_SizeT
 #ifndef Py_LIMITED_API
-#define _PyObject_CallMethodId _PyObject_CallMethodId_SizeT
+#define tiny__PyObject_CallMethodId _PyObject_CallMethodId_SizeT
 #endif /* !Py_LIMITED_API */
 #endif
 

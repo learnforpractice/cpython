@@ -2635,25 +2635,25 @@ static PyMethodDef builtin_methods[] = {
     BUILTIN_BIN_METHODDEF
     BUILTIN_CALLABLE_METHODDEF
     BUILTIN_CHR_METHODDEF
-    BUILTIN_COMPILE_METHODDEF
-    BUILTIN_DELATTR_METHODDEF
+//    BUILTIN_COMPILE_METHODDEF
+//    BUILTIN_DELATTR_METHODDEF
     {"dir",             builtin_dir,        METH_VARARGS, dir_doc},
     BUILTIN_DIVMOD_METHODDEF
-    BUILTIN_EVAL_METHODDEF
-    BUILTIN_EXEC_METHODDEF
-    BUILTIN_FORMAT_METHODDEF
+//    BUILTIN_EVAL_METHODDEF
+//    BUILTIN_EXEC_METHODDEF
+//    BUILTIN_FORMAT_METHODDEF
     {"getattr",         builtin_getattr,    METH_VARARGS, getattr_doc},
-    BUILTIN_GLOBALS_METHODDEF
-    BUILTIN_HASATTR_METHODDEF
-    BUILTIN_HASH_METHODDEF
+//    BUILTIN_GLOBALS_METHODDEF
+//    BUILTIN_HASATTR_METHODDEF
+//    BUILTIN_HASH_METHODDEF
     BUILTIN_HEX_METHODDEF
     BUILTIN_ID_METHODDEF
-    BUILTIN_INPUT_METHODDEF
+//    BUILTIN_INPUT_METHODDEF
     BUILTIN_ISINSTANCE_METHODDEF
     BUILTIN_ISSUBCLASS_METHODDEF
-    {"iter",            builtin_iter,       METH_VARARGS, iter_doc},
+//    {"iter",            builtin_iter,       METH_VARARGS, iter_doc},
     BUILTIN_LEN_METHODDEF
-    BUILTIN_LOCALS_METHODDEF
+//    BUILTIN_LOCALS_METHODDEF
     {"max",             (PyCFunction)builtin_max,        METH_VARARGS | METH_KEYWORDS, max_doc},
     {"min",             (PyCFunction)builtin_min,        METH_VARARGS | METH_KEYWORDS, min_doc},
     {"next",            (PyCFunction)builtin_next,       METH_VARARGS, next_doc},
@@ -2663,7 +2663,7 @@ static PyMethodDef builtin_methods[] = {
     {"print",           (PyCFunction)builtin_print,      METH_VARARGS | METH_KEYWORDS, print_doc},
     BUILTIN_REPR_METHODDEF
     {"round",           (PyCFunction)builtin_round,      METH_VARARGS | METH_KEYWORDS, round_doc},
-    BUILTIN_SETATTR_METHODDEF
+//    BUILTIN_SETATTR_METHODDEF
     BUILTIN_SORTED_METHODDEF
     BUILTIN_SUM_METHODDEF
     {"vars",            builtin_vars,       METH_VARARGS, vars_doc},

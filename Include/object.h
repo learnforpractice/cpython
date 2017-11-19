@@ -774,7 +774,7 @@ PyAPI_FUNC(void) _Py_AddToAllObjects(PyObject *, int force);
 #ifdef Py_LIMITED_API
 PyAPI_FUNC(void) _Py_Dealloc(PyObject *);
 #else
-#define _Py_Dealloc(op) (                               \
+#define tiny__Py_Dealloc(op) (                               \
     _Py_INC_TPFREES(op) _Py_COUNT_ALLOCS_COMMA          \
     (*Py_TYPE(op)->tp_dealloc)((PyObject *)(op)))
 #endif

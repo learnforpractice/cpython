@@ -12,13 +12,13 @@ extern "C" {
 /* If PY_SSIZE_T_CLEAN is defined, each functions treats #-specifier
    to mean Py_ssize_t */
 #ifdef PY_SSIZE_T_CLEAN
-#define PyArg_Parse                     _PyArg_Parse_SizeT
-#define PyArg_ParseTuple                _PyArg_ParseTuple_SizeT
-#define PyArg_ParseTupleAndKeywords     _PyArg_ParseTupleAndKeywords_SizeT
-#define PyArg_VaParse                   _PyArg_VaParse_SizeT
-#define PyArg_VaParseTupleAndKeywords   _PyArg_VaParseTupleAndKeywords_SizeT
-#define Py_BuildValue                   _Py_BuildValue_SizeT
-#define Py_VaBuildValue                 _Py_VaBuildValue_SizeT
+#define tiny_PyArg_Parse                     _PyArg_Parse_SizeT
+#define tiny_PyArg_ParseTuple                _PyArg_ParseTuple_SizeT
+#define tiny_PyArg_ParseTupleAndKeywords     _PyArg_ParseTupleAndKeywords_SizeT
+#define tiny_PyArg_VaParse                   _PyArg_VaParse_SizeT
+#define tiny_PyArg_VaParseTupleAndKeywords   _PyArg_VaParseTupleAndKeywords_SizeT
+#define tiny_Py_BuildValue                   _Py_BuildValue_SizeT
+#define tiny_Py_VaBuildValue                 _Py_VaBuildValue_SizeT
 #else
 #ifndef Py_LIMITED_API
 PyAPI_FUNC(PyObject *) _Py_VaBuildValue_SizeT(const char *, va_list);
@@ -59,9 +59,9 @@ typedef struct _PyArg_Parser {
     struct _PyArg_Parser *next;
 } _PyArg_Parser;
 #ifdef PY_SSIZE_T_CLEAN
-#define _PyArg_ParseTupleAndKeywordsFast  _PyArg_ParseTupleAndKeywordsFast_SizeT
-#define _PyArg_ParseStack  _PyArg_ParseStack_SizeT
-#define _PyArg_VaParseTupleAndKeywordsFast  _PyArg_VaParseTupleAndKeywordsFast_SizeT
+#define tiny__PyArg_ParseTupleAndKeywordsFast  _PyArg_ParseTupleAndKeywordsFast_SizeT
+#define tiny__PyArg_ParseStack  _PyArg_ParseStack_SizeT
+#define tiny__PyArg_VaParseTupleAndKeywordsFast  _PyArg_VaParseTupleAndKeywordsFast_SizeT
 #endif
 PyAPI_FUNC(int) _PyArg_ParseTupleAndKeywordsFast(PyObject *, PyObject *,
                                                  struct _PyArg_Parser *, ...);

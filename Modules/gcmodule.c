@@ -1683,6 +1683,12 @@ _PyGC_Dump(PyGC_Head *g)
 #undef PyObject_GC_Del
 #undef _PyObject_GC_Malloc
 
+#define PyObject_GC_Track tiny_PyObject_GC_Track
+#define PyObject_GC_UnTrack tiny_PyObject_GC_UnTrack
+#define PyObject_GC_Del tiny_PyObject_GC_Del
+#define _PyObject_GC_Malloc tiny__PyObject_GC_Malloc
+
+
 void
 PyObject_GC_Track(void *op)
 {
