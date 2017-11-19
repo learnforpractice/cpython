@@ -57,13 +57,14 @@ PyObject_Size(PyObject *o)
 
     return PyMapping_Size(o);
 }
-
+#if 0
 #undef PyObject_Length
 Py_ssize_t
 PyObject_Length(PyObject *o)
 {
     return PyObject_Size(o);
 }
+#endif
 #define PyObject_Length PyObject_Size
 
 int
@@ -1498,13 +1499,14 @@ PySequence_Size(PyObject *s)
     type_error("object of type '%.200s' has no len()", s);
     return -1;
 }
-
+#if 0
 #undef PySequence_Length
 Py_ssize_t
 PySequence_Length(PyObject *s)
 {
     return PySequence_Size(s);
 }
+#endif
 #define PySequence_Length PySequence_Size
 
 PyObject *
@@ -2014,12 +2016,14 @@ PySequence_Contains(PyObject *seq, PyObject *ob)
 }
 
 /* Backwards compatibility */
+#if 0
 #undef PySequence_In
 int
 PySequence_In(PyObject *w, PyObject *v)
 {
     return PySequence_Contains(w, v);
 }
+#endif
 
 Py_ssize_t
 PySequence_Index(PyObject *s, PyObject *o)
@@ -2053,13 +2057,14 @@ PyMapping_Size(PyObject *o)
     type_error("object of type '%.200s' has no len()", o);
     return -1;
 }
-
+#if 0
 #undef PyMapping_Length
 Py_ssize_t
 PyMapping_Length(PyObject *o)
 {
     return PyMapping_Size(o);
 }
+#endif
 #define PyMapping_Length PyMapping_Size
 
 PyObject *

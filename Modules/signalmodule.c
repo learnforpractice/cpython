@@ -4,6 +4,10 @@
 /* XXX Signals should be recorded per thread, now we have thread state. */
 
 #include "Python.h"
+#include "modsupport.h"
+
+#define PyModule_AddIntMacro(m, c) PyModule_AddIntConstant(m, #c, c)
+
 #ifndef MS_WINDOWS
 #include "posixmodule.h"
 #endif
@@ -53,6 +57,7 @@
 #endif
 
 #include "clinic/signalmodule.c.h"
+
 
 /*[clinic input]
 module signal

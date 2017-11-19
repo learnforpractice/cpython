@@ -807,6 +807,7 @@ _PyErr_BadInternalCall(const char *filename, int lineno)
 /* Remove the preprocessor macro for PyErr_BadInternalCall() so that we can
    export the entry point for existing object code: */
 #undef PyErr_BadInternalCall
+#if 0
 void
 PyErr_BadInternalCall(void)
 {
@@ -814,6 +815,7 @@ PyErr_BadInternalCall(void)
     PyErr_Format(PyExc_SystemError,
                  "bad argument to internal function");
 }
+#endif
 #define PyErr_BadInternalCall() _PyErr_BadInternalCall(__FILE__, __LINE__)
 
 

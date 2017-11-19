@@ -276,7 +276,7 @@ PySlice_AdjustIndices(Py_ssize_t length,
     }
     return 0;
 }
-
+#if 0
 #undef PySlice_GetIndicesEx
 
 int
@@ -289,7 +289,7 @@ PySlice_GetIndicesEx(PyObject *_r, Py_ssize_t length,
     *slicelength = PySlice_AdjustIndices(length, start, stop, *step);
     return 0;
 }
-
+#endif
 static PyObject *
 slice_new(PyTypeObject *type, PyObject *args, PyObject *kw)
 {

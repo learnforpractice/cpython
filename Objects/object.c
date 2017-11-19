@@ -2028,6 +2028,7 @@ _PyTrash_thread_destroy_chain(void)
 #ifndef Py_TRACE_REFS
 /* For Py_LIMITED_API, we need an out-of-line version of _Py_Dealloc.
    Define this here, so we can undefine the macro. */
+#if 0
 #undef _Py_Dealloc
 PyAPI_FUNC(void) _Py_Dealloc(PyObject *);
 void
@@ -2036,6 +2037,7 @@ _Py_Dealloc(PyObject *op)
     _Py_INC_TPFREES(op) _Py_COUNT_ALLOCS_COMMA
     (*Py_TYPE(op)->tp_dealloc)(op);
 }
+#endif
 #endif
 
 #ifdef __cplusplus

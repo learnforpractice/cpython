@@ -5371,7 +5371,7 @@ assemble(struct compiler *c, int addNone)
     assemble_free(&a);
     return co;
 }
-
+#if 0
 #undef PyAST_Compile
 PyAPI_FUNC(PyCodeObject *)
 PyAST_Compile(mod_ty mod, const char *filename, PyCompilerFlags *flags,
@@ -5379,3 +5379,4 @@ PyAST_Compile(mod_ty mod, const char *filename, PyCompilerFlags *flags,
 {
     return PyAST_CompileEx(mod, filename, flags, -1, arena);
 }
+#endif

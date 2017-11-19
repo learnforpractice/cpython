@@ -15,12 +15,13 @@ static int numfree = 0;
 
 /* undefine macro trampoline to PyCFunction_NewEx */
 #undef PyCFunction_New
-
+#if 0
 PyAPI_FUNC(PyObject *)
 PyCFunction_New(PyMethodDef *ml, PyObject *self)
 {
     return PyCFunction_NewEx(ml, self, NULL);
 }
+#endif
 
 PyObject *
 PyCFunction_NewEx(PyMethodDef *ml, PyObject *self, PyObject *module)

@@ -1058,13 +1058,14 @@ Py_CompileStringExFlags(const char *str, const char *filename_str, int start,
 }
 
 /* For use in Py_LIMITED_API */
+#if 0
 #undef Py_CompileString
 PyObject *
 PyCompileString(const char *str, const char *filename, int start)
 {
     return Py_CompileStringFlags(str, filename, start, NULL);
 }
-
+#endif
 struct symtable *
 Py_SymtableStringObject(const char *str, PyObject *filename, int start)
 {
@@ -1430,7 +1431,7 @@ PyOS_CheckStack(void)
 #endif /* USE_STACKCHECK */
 
 /* Deprecated C API functions still provided for binary compatibility */
-
+#if 0
 #undef PyParser_SimpleParseFile
 PyAPI_FUNC(node *)
 PyParser_SimpleParseFile(FILE *fp, const char *filename, int start)
@@ -1545,6 +1546,7 @@ PyRun_InteractiveLoop(FILE *f, const char *p)
 {
     return PyRun_InteractiveLoopFlags(f, p, NULL);
 }
+#endif
 
 #ifdef __cplusplus
 }
