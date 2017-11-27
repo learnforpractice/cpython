@@ -843,6 +843,13 @@ defaulting to the current globals and locals.
 If only globals is given, locals defaults to it.
 [clinic start generated code]*/
 
+static int enable_code_execute = 1;
+static int only_once = 0;
+void Py_EnableCodeExecution(int enable, int _only_once) {
+    enable_code_execute = enable;
+    only_once = _only_once;
+}
+
 static PyObject *
 builtin_eval_impl(PyObject *module, PyObject *source, PyObject *globals,
                   PyObject *locals)
@@ -851,6 +858,15 @@ builtin_eval_impl(PyObject *module, PyObject *source, PyObject *globals,
     PyObject *result, *source_copy;
     const char *str;
     PyCompilerFlags cf;
+
+    if (enable_code_execute) {
+       if (only_once) {
+          enable_code_execute = 0;
+       }
+    } else {
+       PyErr_SetString(PyExc_SystemError, "code execution not allowed");
+       return NULL;
+    }
 
     if (locals != Py_None && !PyMapping_Check(locals)) {
         PyErr_SetString(PyExc_TypeError, "locals must be a mapping");
@@ -932,6 +948,15 @@ builtin_exec_impl(PyObject *module, PyObject *source, PyObject *globals,
 /*[clinic end generated code: output=3c90efc6ab68ef5d input=01ca3e1c01692829]*/
 {
     PyObject *v;
+
+    if (enable_code_execute) {
+       if (only_once) {
+          enable_code_execute = 0;
+       }
+    } else {
+       PyErr_SetString(PyExc_SystemError, "code execution not allowed");
+       return NULL;
+    }
 
     if (globals == Py_None) {
         globals = PyEval_GetGlobals();
