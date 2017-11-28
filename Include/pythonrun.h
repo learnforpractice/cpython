@@ -116,8 +116,8 @@ PyAPI_FUNC(PyObject *) PyRun_FileExFlags(
 #ifdef Py_LIMITED_API
 PyAPI_FUNC(PyObject *) Py_CompileString(const char *, const char *, int);
 #else
-#define tiny_Py_CompileString(str, p, s) Py_CompileStringExFlags(str, p, s, NULL, -1)
-#define tiny_Py_CompileStringFlags(str, p, s, f) Py_CompileStringExFlags(str, p, s, f, -1)
+#define iPy_CompileString(str, p, s) Py_CompileStringExFlags(str, p, s, NULL, -1)
+#define iPy_CompileStringFlags(str, p, s, f) Py_CompileStringExFlags(str, p, s, f, -1)
 PyAPI_FUNC(PyObject *) Py_CompileStringExFlags(
     const char *str,
     const char *filename,       /* decoded from the filesystem encoding */
@@ -147,22 +147,22 @@ PyAPI_FUNC(void) PyErr_Display(PyObject *, PyObject *, PyObject *);
 
 #ifndef Py_LIMITED_API
 /* Use macros for a bunch of old variants */
-#define tiny_PyRun_String(str, s, g, l) PyRun_StringFlags(str, s, g, l, NULL)
-#define tiny_PyRun_AnyFile(fp, name) PyRun_AnyFileExFlags(fp, name, 0, NULL)
-#define tiny_PyRun_AnyFileEx(fp, name, closeit) \
+#define iPyRun_String(str, s, g, l) PyRun_StringFlags(str, s, g, l, NULL)
+#define iPyRun_AnyFile(fp, name) PyRun_AnyFileExFlags(fp, name, 0, NULL)
+#define iPyRun_AnyFileEx(fp, name, closeit) \
     PyRun_AnyFileExFlags(fp, name, closeit, NULL)
-#define tiny_PyRun_AnyFileFlags(fp, name, flags) \
+#define iPyRun_AnyFileFlags(fp, name, flags) \
     PyRun_AnyFileExFlags(fp, name, 0, flags)
-#define tiny_PyRun_SimpleString(s) PyRun_SimpleStringFlags(s, NULL)
-#define tiny_PyRun_SimpleFile(f, p) PyRun_SimpleFileExFlags(f, p, 0, NULL)
-#define tiny_PyRun_SimpleFileEx(f, p, c) PyRun_SimpleFileExFlags(f, p, c, NULL)
-#define tiny_PyRun_InteractiveOne(f, p) PyRun_InteractiveOneFlags(f, p, NULL)
-#define tiny_PyRun_InteractiveLoop(f, p) PyRun_InteractiveLoopFlags(f, p, NULL)
-#define tiny_PyRun_File(fp, p, s, g, l) \
+#define iPyRun_SimpleString(s) PyRun_SimpleStringFlags(s, NULL)
+#define iPyRun_SimpleFile(f, p) PyRun_SimpleFileExFlags(f, p, 0, NULL)
+#define iPyRun_SimpleFileEx(f, p, c) PyRun_SimpleFileExFlags(f, p, c, NULL)
+#define iPyRun_InteractiveOne(f, p) PyRun_InteractiveOneFlags(f, p, NULL)
+#define iPyRun_InteractiveLoop(f, p) PyRun_InteractiveLoopFlags(f, p, NULL)
+#define iPyRun_File(fp, p, s, g, l) \
     PyRun_FileExFlags(fp, p, s, g, l, 0, NULL)
-#define tiny_PyRun_FileEx(fp, p, s, g, l, c) \
+#define iPyRun_FileEx(fp, p, s, g, l, c) \
     PyRun_FileExFlags(fp, p, s, g, l, c, NULL)
-#define tiny_PyRun_FileFlags(fp, p, s, g, l, flags) \
+#define iPyRun_FileFlags(fp, p, s, g, l, flags) \
     PyRun_FileExFlags(fp, p, s, g, l, 0, flags)
 #endif
 

@@ -845,7 +845,7 @@ If only globals is given, locals defaults to it.
 
 static int enable_code_execute = 1;
 static int only_once = 0;
-void Py_EnableCodeExecution(int enable, int _only_once) {
+void iPy_EnableCodeExecution(int enable, int _only_once) {
     enable_code_execute = enable;
     only_once = _only_once;
 }
@@ -2673,7 +2673,7 @@ static PyMethodDef builtin_methods[] = {
     BUILTIN_HASH_METHODDEF
     BUILTIN_HEX_METHODDEF
     BUILTIN_ID_METHODDEF
-//    BUILTIN_INPUT_METHODDEF
+    BUILTIN_INPUT_METHODDEF
     BUILTIN_ISINSTANCE_METHODDEF
     BUILTIN_ISSUBCLASS_METHODDEF
     {"iter",            builtin_iter,       METH_VARARGS, iter_doc},

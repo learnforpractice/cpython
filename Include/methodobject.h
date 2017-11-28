@@ -60,7 +60,7 @@ struct PyMethodDef {
 };
 typedef struct PyMethodDef PyMethodDef;
 
-#define tiny_PyCFunction_New(ML, SELF) PyCFunction_NewEx((ML), (SELF), NULL)
+#define iPyCFunction_New(ML, SELF) PyCFunction_NewEx((ML), (SELF), NULL)
 PyAPI_FUNC(PyObject *) PyCFunction_NewEx(PyMethodDef *, PyObject *,
                                          PyObject *);
 

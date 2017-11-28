@@ -1678,15 +1678,12 @@ _PyGC_Dump(PyGC_Head *g)
 /* extension modules might be compiled with GC support so these
    functions must always be available */
 
+#if 0
 #undef PyObject_GC_Track
 #undef PyObject_GC_UnTrack
 #undef PyObject_GC_Del
 #undef _PyObject_GC_Malloc
-
-#define PyObject_GC_Track tiny_PyObject_GC_Track
-#define PyObject_GC_UnTrack tiny_PyObject_GC_UnTrack
-#define PyObject_GC_Del tiny_PyObject_GC_Del
-#define _PyObject_GC_Malloc tiny__PyObject_GC_Malloc
+#endif
 
 
 void
