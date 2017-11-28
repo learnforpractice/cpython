@@ -921,7 +921,7 @@ Py_GetPythonHome(void)
 {
     wchar_t *home = default_home;
     if (home == NULL && !Py_IgnoreEnvironmentFlag) {
-        char* chome = Py_GETENV("PYTHONHOME");
+        char* chome = Py_GETENV("TINYPYHOME");
         if (chome) {
             size_t size = Py_ARRAY_LENGTH(env_home);
             size_t r = mbstowcs(env_home, chome, size);
