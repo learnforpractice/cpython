@@ -127,7 +127,7 @@ typedef struct {
    Protected by TABLES_LOCK(). */
 static size_t tracemalloc_traced_memory = 0;
 
-static int tracemalloc_is_out_off_memory = 0;
+static int is_out_off_memory = 0;
 
 /* Peak size in bytes of traced memory.
    Protected by TABLES_LOCK(). */
@@ -233,6 +233,37 @@ set_reentrant(int reentrant)
 }
 #endif
 
+
+
+int PyTraceMalloc_GetTracebackLimit()
+{
+    return tracemalloc_config.max_nframe;
+}
+
+int PyTraceMalloc_IsOutOffMemory()
+{
+    return is_out_off_memory;
+}
+
+void PyTraceMalloc_SetMaxMallocSize(int nsize)
+{
+    tracemalloc_config.max_malloc_size  = nsize;
+}
+
+int PyTraceMalloc_GetMaxMallocSize()
+{
+    return tracemalloc_config.max_malloc_size;
+}
+
+void PyTraceMalloc_SetMaxExecutionTime(int nsize)
+{
+    tracemalloc_config.max_execution_time  = nsize;
+}
+
+int PyTraceMalloc_GetMaxExecutionTime()
+{
+    return tracemalloc_config.max_execution_time;
+}
 
 static Py_uhash_t
 hashtable_hash_pyobject(_Py_hashtable_t *ht, const void *pkey)
@@ -682,7 +713,7 @@ tracemalloc_add_trace(_PyTraceMalloc_domain_t domain, uintptr_t ptr,
 static int notice = 0;
 
 static int memory_run_out(void) {
-   if (tracemalloc_is_out_off_memory) {
+   if (is_out_off_memory) {
       if (!notice) {
          notice = 1;
          return 1;
@@ -753,7 +784,7 @@ tracemalloc_alloc(int use_calloc, void *ctx, size_t nelem, size_t elsize)
     }
 
     if (tracemalloc_traced_memory + nelem * elsize >= tracemalloc_config.max_malloc_size) {
-       tracemalloc_is_out_off_memory = 1;
+       is_out_off_memory = 1;
     }
 
     if (use_calloc)
@@ -1177,7 +1208,7 @@ tracemalloc_start(int max_nframe)
         return 0;
     }
 
-    tracemalloc_is_out_off_memory = 0;
+    is_out_off_memory = 0;
 
     assert(1 <= max_nframe && max_nframe <= MAX_NFRAME);
     tracemalloc_config.max_nframe = max_nframe;
@@ -1662,7 +1693,7 @@ PyDoc_STRVAR(tracemalloc_is_out_off_memory_doc,
 static PyObject*
 py_tracemalloc_is_out_off_memory(PyObject *self)
 {
-    return PyLong_FromLong(tracemalloc_is_out_off_memory);
+    return PyLong_FromLong(is_out_off_memory);
 }
 
 

@@ -5216,12 +5216,51 @@ cmp_outcome(int op, PyObject *v, PyObject *w)
     return v;
 }
 
+static const char **white_list = NULL;
+static int enable_white_list = 0;
+
+void Py_SetWhiteList(const char** _white_list) {
+   white_list = _white_list;
+}
+
+void Py_EnableImportWhiteList(int enable) {
+   enable_white_list = enable;
+}
+
 static PyObject *
 import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *level)
 {
     _Py_IDENTIFIER(__import__);
     PyObject *import_func, *res;
     PyObject* stack[5];
+    int i = 0;
+    int found = 0;
+    int size = 0;
+    char *cname = NULL;
+
+    if (name) {
+       cname = PyUnicode_AsUTF8AndSize(name,&size);
+    }
+
+    if (size > 0) {
+       printf("++++++++import %s\n", cname);
+    }
+
+    if (enable_white_list) {
+       if (white_list != NULL) {
+          while (white_list[i] != NULL) {
+//             printf("+++++++%s, %s \n", white_list[i], cname);
+             if (strncmp(white_list[i], cname, size) == 0) {
+                found = 1;
+             }
+             i += 1;
+          }
+       }
+       if (!found) {
+          PyErr_Format(PyExc_SystemError, "import %s no allowed!", cname);
+          return NULL;
+       }
+    }
 
     import_func = _PyDict_GetItemId(f->f_builtins, &PyId___import__);
     if (import_func == NULL) {
