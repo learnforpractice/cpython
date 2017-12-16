@@ -33,10 +33,10 @@ add_library( tinypy
            )
 
 add_library( ssl SHARED IMPORTED )
-set_property( TARGET ssl PROPERTY IMPORTED_LOCATION /usr/local/Cellar/openssl/1.0.2l/lib/libssl.dylib )
+set_property( TARGET ssl PROPERTY IMPORTED_LOCATION ${OPENSSL_LIBRARIES}/libssl.dylib )
 
 add_library( crypto SHARED IMPORTED )
-set_property( TARGET crypto PROPERTY IMPORTED_LOCATION /usr/local/Cellar/openssl/1.0.2l/lib/libcrypto.dylib )
+set_property( TARGET crypto PROPERTY IMPORTED_LOCATION ${OPENSSL_LIBRARIES}/libcrypto.dylib )
 
 add_library(tinypy3.6m  STATIC IMPORTED)
 set_property(TARGET tinypy3.6m PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.a)
