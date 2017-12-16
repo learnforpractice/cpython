@@ -32,16 +32,23 @@ add_library( tinypy
              ${HEADERS}
            )
 
-add_library( ssl SHARED IMPORTED )
-set_property( TARGET ssl PROPERTY IMPORTED_LOCATION ${OPENSSL_LIBRARIES}/libssl.dylib )
+#add_library( ssl SHARED IMPORTED )
+#set_property( TARGET ssl PROPERTY IMPORTED_LOCATION ${OPENSSL_LIBRARIES}/libssl.dylib )
 
-add_library( crypto SHARED IMPORTED )
-set_property( TARGET crypto PROPERTY IMPORTED_LOCATION ${OPENSSL_LIBRARIES}/libcrypto.dylib )
+#add_library( crypto SHARED IMPORTED )
+#set_property( TARGET crypto PROPERTY IMPORTED_LOCATION ${OPENSSL_LIBRARIES}/libcrypto.dylib )
 
 add_library(tinypy3.6m  STATIC IMPORTED)
 set_property(TARGET tinypy3.6m PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.a)
 
-target_link_libraries( tinypy ssl crypto intl tinypy3.6m)
+#target_link_libraries( tinypy ssl crypto intl tinypy3.6m)
+
+target_link_libraries( tinypy 
+#                    PRIVATE ${OPENSSL_LIBRARIES} crypto ssl
+#                   PRIVATE fc
+                    PUBLIC util tinypy3.6m)
+
+
 
 target_include_directories( tinypy
                             PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
