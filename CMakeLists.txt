@@ -41,12 +41,12 @@ add_library( tinypy
 add_library(tinypy3.6m  STATIC IMPORTED)
 set_property(TARGET tinypy3.6m PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.a)
 
-#target_link_libraries( tinypy ssl crypto intl tinypy3.6m)
 
-target_link_libraries( tinypy 
-#                    PRIVATE ${OPENSSL_LIBRARIES} crypto ssl
-#                   PRIVATE fc
-                    PUBLIC util tinypy3.6m)
+if (APPLE)
+    target_link_libraries( tinypy PUBLIC  intl dl util tinypy3.6m)
+else()
+    target_link_libraries( tinypy PUBLIC dl util tinypy3.6m)
+endif()
 
 
 
