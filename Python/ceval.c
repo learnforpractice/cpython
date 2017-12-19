@@ -763,6 +763,10 @@ fn_check set_exit_eval_frame_check(fn_check func) {
    return old;
 }
 
+static int limit_attr = 0;
+void PyObject_LimitAttr(int limit) {
+   limit_attr = limit;
+}
 
 PyObject *
 _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
@@ -2874,9 +2878,23 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
         }
 
         TARGET(LOAD_ATTR) {
+            PyObject *res;
+            char *cname;
+            int size;
             PyObject *name = GETITEM(names, oparg);
             PyObject *owner = TOP();
-            PyObject *res = PyObject_GetAttr(owner, name);
+            if (limit_attr) {
+               cname = PyUnicode_AsUTF8AndSize(name,&size);
+               printf("cname %s \n", cname);
+               if (size >= 2 && (cname[0] == '_' && cname[1] == '_')) {
+                  PyErr_Format(PyExc_SystemError, "load attr of %s no allowed!", cname);
+                  res = NULL;
+               } else {
+                  res = PyObject_GetAttr(owner, name);
+               }
+            } else {
+               res = PyObject_GetAttr(owner, name);
+            }
             Py_DECREF(owner);
             SET_TOP(res);
             if (res == NULL)
