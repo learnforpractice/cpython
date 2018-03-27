@@ -38,7 +38,7 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/dist)
     if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/dist/lib/python3.6/site-packages/cython.py)
         execute_process(
             COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install cython
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist/bin
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dist/lib
             RESULT_VARIABLE rv)
 
         if(NOT rv EQUAL 0)
@@ -77,6 +77,7 @@ endif()
 
 target_include_directories( python3
                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include
+                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                             )
 
 INSTALL( TARGETS
