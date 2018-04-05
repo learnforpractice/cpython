@@ -1293,7 +1293,6 @@
 #define PyInit_imp                     iPyInit_imp                 // T
 #define _PyImportHooks_Init            i_PyImportHooks_Init                 // T
 #define _PyImportZip_Init              i_PyImportZip_Init                 // T
-#define _PyImport_AcquireLock          i_PyImport_AcquireLock                 // T
 #define _PyImport_FindBuiltin          i_PyImport_FindBuiltin                 // T
 #define _PyImport_FindExtensionObject  i_PyImport_FindExtensionObject                 // T
 #define _PyImport_Fini                 i_PyImport_Fini                 // T
@@ -1301,7 +1300,12 @@
 #define _PyImport_FixupExtensionObject i_PyImport_FixupExtensionObject                 // T
 #define _PyImport_Init                 i_PyImport_Init                 // T
 #define _PyImport_ReInitLock           i_PyImport_ReInitLock                 // T
+
+#ifdef WITH_THREAD
+#define _PyImport_AcquireLock          i_PyImport_AcquireLock                 // T
 #define _PyImport_ReleaseLock          i_PyImport_ReleaseLock                 // T
+#endif
+
 #define _PyImport_LoadDynamicModuleWithSpec i_PyImport_LoadDynamicModuleWithSpec                 // T
 #define PyMarshal_Init                 iPyMarshal_Init                 // T
 #define PyMarshal_ReadLastObjectFromFile iPyMarshal_ReadLastObjectFromFile                 // T
