@@ -12,12 +12,14 @@ typedef void (*fn_init_modules)(void);
 
 #define MAXPATHLEN 1024
 static wchar_t env_home[MAXPATHLEN+1];
-
-extern "C" int init_tinypy(fn_init_modules init_modules) {
+extern "C" void PyInit_pydebug();
+extern "C" int init_mypy(fn_init_modules init_modules) {
    Py_NoSiteFlag = 1;
+#if 0
    const char *chome = "/Users/newworld/dev/pyeos/libraries/tinypy/dist";
    mbstowcs(env_home, chome, sizeof(env_home)/sizeof(env_home[0]));
    Py_SetPythonHome(env_home);
+#endif
    Py_InitializeEx(0);
 //   _Py_InitializeEx_Private(0, 1);
 
@@ -28,7 +30,11 @@ extern "C" int init_tinypy(fn_init_modules init_modules) {
    if (init_modules) {
       init_modules();
    }
+
+   PyInit_pydebug();
+
    printf("hello,world\n");
+   PyRun_SimpleString("import pydebug;pydebug.test()");
    PyRun_SimpleString("import sys");
    PyRun_SimpleString("print(sys.path)");
    PyRun_SimpleString("from _heapq import *");

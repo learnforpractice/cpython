@@ -1,5 +1,14 @@
 set(PYTHON_LIB_SS "${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.a")
 
+set(PYTHON3 "${CMAKE_SOURCE_DIR}/libraries/python/dist/bin/python3")
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/eos/wrap/pydebug.wrap.cpp
+    COMMAND ${PYTHON3} -m cython --cplus ${CMAKE_CURRENT_SOURCE_DIR}/eos/cython/pydebug.pyx -o ${CMAKE_CURRENT_SOURCE_DIR}/eos/wrap/pydebug.wrap.cpp
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/eos/cython/pydebug.pyx
+)
+
+
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
     COMMAND python pre_config.py "${OPENSSL_ROOT}"
@@ -19,7 +28,8 @@ add_custom_command(
 
 add_library( python3-ss
              STATIC
-            ${CMAKE_CURRENT_SOURCE_DIR}/tinypy.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/eos/wrap/pydebug.wrap.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/start.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
             ${PYTHON_LIB_SS}
 )
@@ -34,8 +44,9 @@ endif()
 target_include_directories( python3-ss
                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include
                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+                            PUBLIC  ${Boost_INCLUDE_DIRS}
+                            PUBLIC  ${OPENSSL_INCLUDE_DIR}
                             )
-
 INSTALL( TARGETS
    python3-ss
 
