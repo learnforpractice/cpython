@@ -20,7 +20,11 @@ extern "C" int init_tinypy(fn_init_modules init_modules) {
    Py_SetPythonHome(env_home);
    Py_InitializeEx(0);
 //   _Py_InitializeEx_Private(0, 1);
+
+#ifdef WITH_THREAD
    PyEval_InitThreads();
+#endif
+
    if (init_modules) {
       init_modules();
    }
