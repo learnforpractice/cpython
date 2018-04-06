@@ -68,7 +68,7 @@ add_custom_command(
     COMMAND bash configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist ${ENABLE_SHARED}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "configure python3.6.4"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/configure
+#    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/configure
 )
 
 add_custom_command(
