@@ -61,6 +61,14 @@ else()
     set(ENABLE_SHARED "--enable-shared")
 endif()
 
+set(PYTHON3 "${CMAKE_SOURCE_DIR}/libraries/python/dist/bin/python3")
+ 
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/extmod/wrap/utility.wrap.cpp
+    COMMAND ${PYTHON3} -m cython --cplus ${CMAKE_CURRENT_SOURCE_DIR}/extmod/cython/utility.pyx -o ${CMAKE_CURRENT_SOURCE_DIR}/extmod/wrap/utility.wrap.cpp
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/extmod/cython/utility.pyx
+)
+
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
@@ -85,7 +93,7 @@ add_custom_command(
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install cython
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "make python3.6.4"
-    DEPENDS ${PYTHON_LIB}
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
 )
 
 add_custom_command(
@@ -97,8 +105,10 @@ add_custom_command(
 )
 
 add_library( python3
-             SHARED
-            ${CMAKE_CURRENT_SOURCE_DIR}/dummy.c 
+             STATIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/start.cpp 
+            ${CMAKE_CURRENT_SOURCE_DIR}/extmod/interface/utility.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/extmod/wrap/utility.wrap.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
             ${PYTHON_LIB_INSTALL}
 )
