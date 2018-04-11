@@ -66,7 +66,7 @@ set(PYTHON3 "${CMAKE_SOURCE_DIR}/libraries/python/dist/bin/python3")
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
     COMMAND python pre_config.py "${OPENSSL_ROOT}"
-    COMMAND bash configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist ${ENABLE_SHARED}
+    COMMAND bash configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "configure python3.6.4"
 #    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/configure
@@ -106,7 +106,7 @@ add_library( python3
 
 
 if (APPLE)
-    target_link_libraries( python3 PUBLIC ${PYTHON_LIB_INSTALL})
+    target_link_libraries( python3 PUBLIC intl ${PYTHON_LIB_INSTALL})
 else()
     target_link_libraries( python3 PUBLIC ${PYTHON_LIB_INSTALL})
 endif()
