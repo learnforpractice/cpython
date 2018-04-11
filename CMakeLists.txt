@@ -12,21 +12,13 @@ add_custom_command(
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/eos/cython/pydebug.pyx
 )
 
-if (APPLE)
-    set(PYTHON_SS_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.a")
-    set(PYTHON_SS_LIB_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/dist/lib/libpython3.6m.a")
-    set(ENABLE_SHARED "")
-else()
-    set(PYTHON_SS_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.so")
-    set(PYTHON_SS_LIB_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/dist/lib/libpython3.6m.so")
-    set(ENABLE_SHARED "--enable-shared")
-endif()
-
+set(PYTHON_SS_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.a")
+set(PYTHON_SS_LIB_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/dist/lib/libpython3.6m.a")
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
     COMMAND python pre_config.py "${OPENSSL_ROOT}"
-    COMMAND bash configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist ${ENABLE_SHARED}
+    COMMAND bash configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "configure python3.6.3-single-thread"
 #    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/configure
