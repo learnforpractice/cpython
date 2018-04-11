@@ -51,15 +51,10 @@ endif()
 
 endif()
 
-if (APPLE)
-    set(PYTHON_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.a")
-    set(PYTHON_LIB_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/dist/lib/libpython3.6m.a")
-    set(ENABLE_SHARED "")
-else()
-    set(PYTHON_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.so")
-    set(PYTHON_LIB_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/dist/lib/libpython3.6m.so")
-    set(ENABLE_SHARED "--enable-shared")
-endif()
+set(PYTHON_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.a")
+set(PYTHON_LIB_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/dist/lib/libpython3.6m.a")
+set(ENABLE_SHARED "")
+
 
 set(PYTHON3 "${CMAKE_SOURCE_DIR}/libraries/python/dist/bin/python3")
 
@@ -85,7 +80,7 @@ add_custom_command(
     COMMAND make install
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install cython
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "make python3.6.4"
+    COMMENT "installing python3.6.4"
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
 )
 
@@ -93,7 +88,7 @@ add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/dummy.c
     COMMAND touch ${CMAKE_CURRENT_SOURCE_DIR}/dummy.c
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "build python3.6.4"
+    COMMENT "linking python3.6.4"
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
 )
 
