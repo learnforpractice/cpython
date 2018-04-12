@@ -103,7 +103,7 @@ add_library( python3
 if (APPLE)
     target_link_libraries( python3 PUBLIC intl ${PYTHON_LIB_INSTALL})
 else()
-    target_link_libraries( python3 PUBLIC ${PYTHON_LIB_INSTALL})
+    target_link_libraries( python3 PUBLIC ${PYTHON_LIB_INSTALL} util)
 endif()
 
 target_include_directories( python3
