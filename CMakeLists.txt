@@ -93,7 +93,7 @@ add_custom_command(
 )
 
 add_library( python3
-             STATIC
+             SHARED
             ${CMAKE_CURRENT_SOURCE_DIR}/start.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
             ${PYTHON_LIB_INSTALL}
@@ -101,9 +101,9 @@ add_library( python3
 
 
 if (APPLE)
-    target_link_libraries( python3 PUBLIC intl ${PYTHON_LIB_INSTALL})
+    target_link_libraries( python3 PUBLIC intl ${PYTHON_LIB_INSTALL} ${OPENSSL_LIBRARIES} )
 else()
-    target_link_libraries( python3 PUBLIC ${PYTHON_LIB_INSTALL} util)
+    target_link_libraries( python3 PUBLIC ${PYTHON_LIB_INSTALL} ${OPENSSL_LIBRARIES} util  -Xlinker -export-dynamic)
 endif()
 
 target_include_directories( python3
