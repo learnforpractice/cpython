@@ -93,7 +93,6 @@ add_custom_command(
 )
 
 add_library( python3
-             SHARED
             ${CMAKE_CURRENT_SOURCE_DIR}/start.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
             ${PYTHON_LIB_INSTALL}
