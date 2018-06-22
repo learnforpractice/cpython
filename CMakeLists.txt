@@ -59,6 +59,11 @@ set(ENABLE_SHARED "")
 set(PYTHON3 "${CMAKE_SOURCE_DIR}/libraries/python/dist/bin/python3")
 set( ENV{OPENSSL_ROOT} "${OPENSSL_ROOT}" )
 
+if(NOT APPLE)
+     # Linux or other unix
+    set( ENV{LD_LIBRARY_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/dist/lib" )
+endif(NOT APPLE)
+
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
 #    COMMAND python pre_config.py "${OPENSSL_ROOT}"
@@ -77,9 +82,9 @@ add_custom_command(
 )
 
 add_custom_command(
-    OUTPUT ${PYTHON_LIB_INSTALL}
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3
     COMMAND make install
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install cython
+    COMMAND LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install cython
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "installing python3.6.4"
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
@@ -90,20 +95,21 @@ add_custom_command(
     COMMAND touch ${CMAKE_CURRENT_SOURCE_DIR}/dummy.c
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "linking python3.6.4"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h ${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3
 )
 
 add_library( python3
+	     ${CMAKE_CURRENT_SOURCE_DIR}/dummy.c
             ${CMAKE_CURRENT_SOURCE_DIR}/start.cpp 
             ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
-            ${PYTHON_LIB_INSTALL}
+            ${PYTHON_LIB}
 )
 
 
 if (APPLE)
-    target_link_libraries( python3 PUBLIC intl ${PYTHON_LIB_INSTALL} ${OPENSSL_LIBRARIES} )
+    target_link_libraries( python3 PUBLIC intl ${PYTHON_LIB} ${OPENSSL_LIBRARIES} )
 else()
-    target_link_libraries( python3 PUBLIC ${PYTHON_LIB_INSTALL} ${OPENSSL_LIBRARIES} util  -Xlinker -export-dynamic)
+    target_link_libraries( python3 PUBLIC ${PYTHON_LIB} ${OPENSSL_LIBRARIES} util  -Xlinker -export-dynamic)
 endif()
 
 target_include_directories( python3
