@@ -57,11 +57,12 @@ set(ENABLE_SHARED "")
 
 
 set(PYTHON3 "${CMAKE_SOURCE_DIR}/libraries/python/dist/bin/python3")
+set( ENV{OPENSSL_ROOT} "${OPENSSL_ROOT}" )
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
-    COMMAND python pre_config.py "${OPENSSL_ROOT}"
-    COMMAND bash configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist
+#    COMMAND python pre_config.py "${OPENSSL_ROOT}"
+    COMMAND bash configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist --enable-shared
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "configure python3.6.4"
 #    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/configure
