@@ -51,8 +51,8 @@ endif()
 
 endif()
 
-set(PYTHON_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.a")
-set(PYTHON_LIB_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/dist/lib/libpython3.6m.a")
+set(PYTHON_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m${CMAKE_SHARED_LIBRARY_SUFFIX}")
+set(PYTHON_LIB_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/dist/lib/libpython3.6m${CMAKE_SHARED_LIBRARY_SUFFIX}")
 set(ENABLE_SHARED "")
 
 
@@ -75,19 +75,19 @@ add_custom_command(
 
 add_custom_command(
     OUTPUT ${PYTHON_LIB}
-    COMMAND make ${BUILD_FLAGS}
+    COMMAND OPENSSL_ROOT=${OPENSSL_ROOT};make ${BUILD_FLAGS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "make python3.6.4"
+    COMMENT "making python3.6.4"
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
 )
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3
+    OUTPUT ${PYTHON_LIB_INSTALL}
     COMMAND make install
     COMMAND LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install cython
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "installing python3.6.4"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h ${PYTHON_LIB}
 )
 
 add_custom_command(
@@ -95,7 +95,7 @@ add_custom_command(
     COMMAND touch ${CMAKE_CURRENT_SOURCE_DIR}/dummy.c
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "linking python3.6.4"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h ${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h ${PYTHON_LIB_INSTALL}
 )
 
 add_library( python3
