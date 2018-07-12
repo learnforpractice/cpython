@@ -85,6 +85,7 @@ add_custom_command(
     OUTPUT ${PYTHON_LIB_INSTALL}
     COMMAND make install
     COMMAND LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install cython
+    COMMAND LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install ptvsd==3.0.0
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "installing python3.6.4"
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h ${PYTHON_LIB}
