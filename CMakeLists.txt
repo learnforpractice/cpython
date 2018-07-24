@@ -41,6 +41,7 @@ add_custom_command(
 
 add_library( python3-ss
              STATIC
+            Modules/_struct.c
             ${CMAKE_CURRENT_SOURCE_DIR}/eos/wrap/pydebug.wrap.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
             ${PYTHON_SS_LIB}
