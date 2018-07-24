@@ -21,6 +21,8 @@
 
 #include <ctype.h>
 
+#include "injector.h"
+
 /* Turn this on if your compiler chokes on the big switch: */
 /* #define CASE_TOO_BIG 1 */
 
@@ -863,6 +865,10 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 
 #define DISPATCH() \
     { \
+    if (!check_time()) { \
+       PyErr_SetString(PyExc_ImportError, "execution time out!");\
+       goto exit_eval_frame; \
+    } \
     if (exit_eval_frame_check && exit_eval_frame_check()) { \
        goto exit_eval_frame; \
     } \
@@ -875,6 +881,10 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 #ifdef LLTRACE
 #define FAST_DISPATCH() \
     { \
+    if (!check_time()) { \
+       PyErr_SetString(PyExc_ImportError, "execution time out!");\
+       goto exit_eval_frame; \
+    } \
     if (exit_eval_frame_check && exit_eval_frame_check()) { \
         goto exit_eval_frame; \
     } \
@@ -888,6 +898,10 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 #else
 #define FAST_DISPATCH() \
     { \
+    if (!check_time()) { \
+       PyErr_SetString(PyExc_ImportError, "execution time out!");\
+       goto exit_eval_frame; \
+    } \
     if (exit_eval_frame_check && exit_eval_frame_check()) { \
        goto exit_eval_frame; \
     } \
@@ -4832,6 +4846,10 @@ call_function(PyObject ***pp_stack, Py_ssize_t oparg, PyObject *kwnames)
     Py_ssize_t nargs = oparg - nkwargs;
     PyObject **stack;
 
+    if (!is_function_in_whitelist(func)) {
+       PyErr_Format(PyExc_RuntimeError, "function %R has been back out!", func);
+       return NULL;
+    }
     /* Always dispatch PyCFunction first, because these are
        presumed to be the most frequent callable object.
     */
@@ -5222,6 +5240,11 @@ import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *leve
     _Py_IDENTIFIER(__import__);
     PyObject *import_func, *res;
     PyObject* stack[5];
+
+    if (!is_import_name_in_whitelist(name)) {
+       PyErr_Format(PyExc_ImportError, "cannot import name %R", name);
+       return NULL;
+    }
 
     import_func = _PyDict_GetItemId(f->f_builtins, &PyId___import__);
     if (import_func == NULL) {

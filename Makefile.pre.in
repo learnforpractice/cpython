@@ -365,7 +365,8 @@ PYTHON_OBJS=	\
 		$(LIBOBJS) \
 		$(MACHDEP_OBJS) \
 		$(THREADOBJ) \
-		$(DTRACE_OBJS)
+		$(DTRACE_OBJS) \
+		injector.o
 
 
 ##########################################################################
