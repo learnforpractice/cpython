@@ -103,7 +103,7 @@ intern_string_constants(PyObject *tuple)
     return modified;
 }
 
-
+#include "injector.h"
 PyCodeObject *
 PyCode_New(int argcount, int kwonlyargcount,
            int nlocals, int stacksize, int flags,
@@ -115,6 +115,17 @@ PyCode_New(int argcount, int kwonlyargcount,
     PyCodeObject *co;
     unsigned char *cell2arg = NULL;
     Py_ssize_t i, n_cellvars;
+
+    Py_ssize_t name_size;
+    char *_name = PyUnicode_AsUTF8AndSize(name, &name_size);
+
+    printf("++++++++++++PyCode_New %s\n", _name);
+
+
+    if (!is_create_code_object_enabled()) {
+       PyErr_Format(PyExc_RuntimeError, "new code not allowed %R", name);
+       return NULL;
+    }
 
     /* Check argument types */
     if (argcount < 0 || kwonlyargcount < 0 || nlocals < 0 ||

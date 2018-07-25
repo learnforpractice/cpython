@@ -918,13 +918,18 @@ PyObject_SetAttr(PyObject *v, PyObject *name, PyObject *value)
 {
     PyTypeObject *tp = Py_TYPE(v);
     int err;
-
     if (!PyUnicode_Check(name)) {
         PyErr_Format(PyExc_TypeError,
                      "attribute name must be string, not '%.200s'",
                      name->ob_type->tp_name);
         return -1;
     }
+
+    if (!inspect_attr(name)) {
+       PyErr_Format(PyExc_TypeError, "set attribute name %R not allowed", name);
+       return -1;
+    }
+
     Py_INCREF(name);
 
     PyUnicode_InternInPlace(&name);

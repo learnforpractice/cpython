@@ -861,6 +861,10 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 
 #define TARGET(op) \
     TARGET_##op: \
+    if (!inspect_opcode(opcode)) { \
+       PyErr_Format(PyExc_SystemError, "opcode %d not allowed", opcode); \
+       goto exit_eval_frame; \
+    } \
     case op:
 
 #define DISPATCH() \
@@ -977,7 +981,11 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
     do{ \
         _Py_CODEUNIT word = *next_instr; \
         opcode = _Py_OPCODE(word); \
-        if (opcode == op){ \
+        if (!inspect_opcode(opcode)) { \
+           PyErr_Format(PyExc_SystemError, "opcode %d not allowed", opcode); \
+           goto exit_eval_frame; \
+        } \
+         if (opcode == op){ \
             oparg = _Py_OPARG(word); \
             next_instr++; \
             goto PRED_##op; \
@@ -1296,6 +1304,10 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             }
         }
 #endif
+        if (!inspect_opcode(opcode)) {
+           PyErr_Format(PyExc_SystemError, "opcode %d not allowed", opcode);
+           goto error;
+        }
 
         switch (opcode) {
 
@@ -2334,6 +2346,7 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             PyObject *v = SECOND();
             int err;
             STACKADJ(-2);
+
             err = PyObject_SetAttr(owner, name, v);
             Py_DECREF(v);
             Py_DECREF(owner);
@@ -4846,15 +4859,17 @@ call_function(PyObject ***pp_stack, Py_ssize_t oparg, PyObject *kwnames)
     Py_ssize_t nargs = oparg - nkwargs;
     PyObject **stack;
 
-    if (!is_function_in_whitelist(func)) {
-       PyErr_Format(PyExc_RuntimeError, "function %R has been back out!", func);
-       return NULL;
-    }
     /* Always dispatch PyCFunction first, because these are
        presumed to be the most frequent callable object.
     */
+
     if (PyCFunction_Check(func)) {
-        PyThreadState *tstate = PyThreadState_GET();
+       if (!inspect_function(func)) {
+          PyErr_Format(PyExc_RuntimeError, "function %R has been back out!", func);
+          return NULL;
+       }
+
+       PyThreadState *tstate = PyThreadState_GET();
 
         PCALL(PCALL_CFUNCTION);
 
@@ -5241,7 +5256,7 @@ import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *leve
     PyObject *import_func, *res;
     PyObject* stack[5];
 
-    if (!is_import_name_in_whitelist(name)) {
+    if (!inspect_import_name(name)) {
        PyErr_Format(PyExc_ImportError, "cannot import name %R", name);
        return NULL;
     }

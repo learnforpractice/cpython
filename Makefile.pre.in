@@ -549,12 +549,12 @@ platform: $(BUILDPYTHON) pybuilddir.txt
 # or removed in case of failure.
 pybuilddir.txt: $(BUILDPYTHON)
 	@echo "none" > ./pybuilddir.txt
-	$(RUNSHARED) $(PYTHON_FOR_BUILD) -S -m sysconfig --generate-posix-vars ;\
-	if test $$? -ne 0 ; then \
-		echo "generate-posix-vars failed" ; \
-		rm -f ./pybuilddir.txt ; \
-		exit 1 ; \
-	fi
+#	$(RUNSHARED) $(PYTHON_FOR_BUILD) -S -m sysconfig --generate-posix-vars ;\
+#	if test $$? -ne 0 ; then \
+#		echo "generate-posix-vars failed" ; \
+#		rm -f ./pybuilddir.txt ; \
+#		exit 1 ; \
+#	fi
 
 # This is shared by the math and cmath modules
 Modules/_math.o: Modules/_math.c Modules/_math.h

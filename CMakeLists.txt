@@ -29,6 +29,7 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "make python3.6.3-single-thread"
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
+    # ${CMAKE_CURRENT_SOURCE_DIR}/injector.c ${CMAKE_CURRENT_SOURCE_DIR}/injector.h
 )
 
 add_custom_command(
