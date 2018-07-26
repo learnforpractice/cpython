@@ -215,6 +215,9 @@ PyCode_New(int argcount, int kwonlyargcount,
     co->co_zombieframe = NULL;
     co->co_weakreflist = NULL;
     co->co_extra = NULL;
+
+    add_code_object_to_current_account(co);
+
     return co;
 }
 

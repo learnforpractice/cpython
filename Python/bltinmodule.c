@@ -2787,3 +2787,7 @@ _PyBuiltin_Init(void)
 #undef ADD_TO_ALL
 #undef SETBUILTIN
 }
+
+PyObject* builtin_exec_(PyObject *co, PyObject *globals, PyObject *locals) {
+   return builtin_exec_impl(NULL, co, globals, locals);
+}

@@ -765,6 +765,15 @@ fn_check set_exit_eval_frame_check(fn_check func) {
    return old;
 }
 
+static PyFrameObject* current_frame = NULL;
+
+void PyEval_SetCurrentFrame(PyFrameObject *f) {
+   current_frame = f;
+}
+
+PyFrameObject *PyEval_GetCurrentFrame() {
+   return current_frame;
+}
 
 PyObject *
 _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
@@ -782,6 +791,7 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
     PyThreadState *tstate = PyThreadState_GET();
     PyCodeObject *co;
 
+    PyEval_SetCurrentFrame(f);
     /* when tracing we set things up so that
 
            not (instr_lb <= current_bytecode_offset < instr_ub)
@@ -3768,7 +3778,7 @@ exit_eval_frame:
     Py_LeaveRecursiveCall();
     f->f_executing = 0;
     tstate->frame = f->f_back;
-
+    PyEval_SetCurrentFrame(NULL);
     return _Py_CheckFunctionResult(NULL, retval, "PyEval_EvalFrameEx");
 }
 

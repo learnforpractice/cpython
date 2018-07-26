@@ -4,6 +4,8 @@
 #include "Python.h"
 #include "frameobject.h"
 
+#include "injector.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -887,18 +889,66 @@ PyObject_GetAttr(PyObject *v, PyObject *name)
                      name->ob_type->tp_name);
         return NULL;
     }
+
     if (tp->tp_getattro != NULL)
         return (*tp->tp_getattro)(v, name);
     if (tp->tp_getattr != NULL) {
         char *name_str = PyUnicode_AsUTF8(name);
         if (name_str == NULL)
             return NULL;
+
+        if (!inspect_getattr(v, name)) {
+           PyErr_Format(PyExc_AttributeError,
+                        "inspect_getattr: get attribute '%U' of '%.50s' object has been forbidened ",
+                        name, tp->tp_name);
+           return NULL;
+        }
+
         return (*tp->tp_getattr)(v, name_str);
     }
     PyErr_Format(PyExc_AttributeError,
                  "'%.50s' object has no attribute '%U'",
                  tp->tp_name, name);
     return NULL;
+}
+
+int object_is_function(PyObject* func) {
+   if (!func) {
+      return 0;
+   }
+   if (PyCFunction_Check(func)) {
+      return 1;
+   }
+   if (PyFunction_Check(func)) {
+      return 1;
+   }
+   if (PyMethod_Check(func)) {
+      return 1;
+   }
+   return 0;
+}
+
+int attr_is_function(PyObject* v, PyObject* name) {
+    PyTypeObject *tp = Py_TYPE(v);
+
+    if (!PyUnicode_Check(name)) {
+        return 0;
+    }
+
+    if (tp->tp_getattro != NULL) {
+       PyObject* o = (*tp->tp_getattro)(v, name);
+       return object_is_function(o);
+    }
+
+    if (tp->tp_getattr != NULL) {
+        char *name_str = PyUnicode_AsUTF8(name);
+        if (name_str == NULL)
+            return 0;
+
+        PyObject* o = (*tp->tp_getattr)(v, name_str);
+        return object_is_function(o);
+    }
+    return 0;
 }
 
 int
@@ -925,12 +975,12 @@ PyObject_SetAttr(PyObject *v, PyObject *name, PyObject *value)
         return -1;
     }
 
-    if (!inspect_attr(name)) {
+    Py_INCREF(name);
+
+    if (!inspect_setattr(v, name)) {
        PyErr_Format(PyExc_TypeError, "set attribute name %R not allowed", name);
        return -1;
     }
-
-    Py_INCREF(name);
 
     PyUnicode_InternInPlace(&name);
     if (tp->tp_setattro != NULL) {

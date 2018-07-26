@@ -38,11 +38,18 @@ int whitelist_attr_(const char* name) {
    return 1;
 }
 
-int inspect_attr(PyObject* name) {
+int inspect_setattr(PyObject* v, PyObject* name) {
    if (!s_api.enabled) {
       return 1;
    }
-   return s_api.inspect_attr(name);
+   return s_api.inspect_setattr(v, name);
+}
+
+int inspect_getattr(PyObject* v, PyObject* name) {
+   if (!s_api.enabled) {
+      return 1;
+   }
+   return s_api.inspect_getattr(v, name);
 }
 
 int inspect_opcode(int opcode) {
@@ -75,6 +82,35 @@ void enable_create_code_object(int enable) {
       s_api.enable_create_code_object = -1;
    }
 }
+
+void add_code_object_to_current_account(PyCodeObject* co) {
+   if (!s_api.enabled) {
+      return;
+   }
+   s_api.add_code_object_to_current_account(co);
+}
+
+int is_code_object_in_current_account(PyCodeObject* co) {
+   if (!s_api.enabled) {
+      return 1;
+   }
+   return s_api.is_code_object_in_current_account(co);
+}
+
+int is_current_code_object_in_current_account() {
+   if (!s_api.enabled) {
+      return 1;
+   }
+   PyFrameObject* f = PyEval_GetCurrentFrame();
+   if (!f) {
+      return 0;
+   }
+   if (!f->f_code) {
+      return 0;
+   }
+   return is_code_object_in_current_account(f->f_code);
+}
+
 
 int is_create_code_object_enabled() {
    if (s_api.enable_create_code_object == 0) {
