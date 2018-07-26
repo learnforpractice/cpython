@@ -119,6 +119,41 @@ int is_create_code_object_enabled() {
    return s_api.enable_create_code_object == 1;
 }
 
+void memory_trace_start() {
+   if (!s_api.enabled) {
+      return;
+   }
+   s_api.memory_trace_start();
+}
+
+void memory_trace_stop() {
+   if (!s_api.enabled) {
+      return;
+   }
+   s_api.memory_trace_stop();
+}
+
+void memory_trace_alloc(void* ptr, size_t size) {
+   if (!s_api.enabled) {
+      return;
+   }
+   s_api.memory_trace_alloc(ptr, size);
+}
+
+void memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_size) {
+   if (!s_api.enabled) {
+      return;
+   }
+   s_api.memory_trace_realloc(old_ptr, new_ptr, new_size);
+}
+
+void memory_trace_free(void* ptr) {
+   if (!s_api.enabled) {
+      return;
+   }
+   s_api.memory_trace_free(ptr);
+}
+
 int check_time() {
    if (!s_api.enabled) {
       return 1;
