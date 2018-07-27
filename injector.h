@@ -21,6 +21,9 @@ struct python_injected_apis {
    int enabled;
    int enable_opcode_inspect;
    int enable_create_code_object;
+   int enable_filter_set_attr;
+   int enable_filter_get_attr;
+
    int status;
 
    void (*whitelist_function)(PyObject* func);
@@ -51,6 +54,8 @@ struct python_injected_apis {
 
 struct python_injected_apis* get_injected_apis();
 
+void enable_injected_apis(int enabled);
+
 void inspect_set_status(int n);
 
 void whitelist_function(PyObject* func);
@@ -61,12 +66,15 @@ int inspect_setattr(PyObject* v, PyObject* name);
 int inspect_getattr(PyObject* v, PyObject* name);
 int inspect_opcode(int opcode);
 
+void enable_create_code_object(int enable);
+void enable_filter_set_attr(int enable);
+void enable_filter_get_attr(int enable);
 void enable_opcode_inspector(int enable);
+
 
 void inspect_set_status(int status);
 int inspect_get_status();
 
-void enable_create_code_object(int enable);
 int is_create_code_object_enabled();
 
 void add_code_object_to_current_account(PyCodeObject* co);

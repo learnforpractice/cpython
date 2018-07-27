@@ -10,13 +10,16 @@ for _dict in [db.__dict__, eoslib.__dict__, struct.__dict__, int.__dict__]:
             print('+++++++++',v)
             inspector.add_function_to_white_list(v)
 
-whitelist = [    str, list, dict, int,
+whitelist = [    str,
+                 ''.format,
+                 list, dict, int,
                  int.from_bytes,
                  int.to_bytes,
                  hasattr,
                  getattr,
                  setattr,
                  print,
+                 __build_class__,
              ]
 
 print('++++++++++++++int.from_bytes:', int.from_bytes)

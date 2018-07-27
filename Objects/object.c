@@ -890,20 +890,14 @@ PyObject_GetAttr(PyObject *v, PyObject *name)
         return NULL;
     }
 
-    if (tp->tp_getattro != NULL)
-        return (*tp->tp_getattro)(v, name);
+    if (tp->tp_getattro != NULL) {
+       return (*tp->tp_getattro)(v, name);
+    }
+
     if (tp->tp_getattr != NULL) {
         char *name_str = PyUnicode_AsUTF8(name);
         if (name_str == NULL)
             return NULL;
-
-        if (!inspect_getattr(v, name)) {
-           PyErr_Format(PyExc_AttributeError,
-                        "inspect_getattr: get attribute '%U' of '%.50s' object has been forbidened ",
-                        name, tp->tp_name);
-           return NULL;
-        }
-
         return (*tp->tp_getattr)(v, name_str);
     }
     PyErr_Format(PyExc_AttributeError,
@@ -928,11 +922,21 @@ int object_is_function(PyObject* func) {
    return 0;
 }
 
-int attr_is_function(PyObject* v, PyObject* name) {
+int filter_attr(PyObject* v, PyObject* name) {
+    Py_ssize_t size;
+    char* cname;
+
     PyTypeObject *tp = Py_TYPE(v);
 
     if (!PyUnicode_Check(name)) {
         return 0;
+    }
+
+    cname = PyUnicode_AsUTF8AndSize(name,&size);
+    if (size >= 2 && cname) {
+       if (cname[0] == '_' && cname[1] == '_') {
+          return 0;
+       }
     }
 
     if (tp->tp_getattro != NULL) {

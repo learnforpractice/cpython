@@ -6,6 +6,10 @@ struct python_injected_apis* get_injected_apis() {
    return &s_api;
 }
 
+void enable_injected_apis(int enabled) {
+   s_api.enabled = enabled;
+}
+
 void whitelist_function(PyObject* func) {
    s_api.whitelist_function(func);
 }
@@ -39,14 +43,14 @@ int whitelist_attr_(const char* name) {
 }
 
 int inspect_setattr(PyObject* v, PyObject* name) {
-   if (!s_api.enabled) {
+   if (!s_api.enable_filter_set_attr) {
       return 1;
    }
    return s_api.inspect_setattr(v, name);
 }
 
 int inspect_getattr(PyObject* v, PyObject* name) {
-   if (!s_api.enabled) {
+   if (!s_api.enable_filter_get_attr) {
       return 1;
    }
    return s_api.inspect_getattr(v, name);
@@ -82,6 +86,23 @@ void enable_create_code_object(int enable) {
       s_api.enable_create_code_object = -1;
    }
 }
+
+void enable_filter_set_attr(int enable) {
+   if (enable) {
+      s_api.enable_filter_set_attr = 1;
+   } else {
+      s_api.enable_filter_set_attr = 0;
+   }
+}
+
+void enable_filter_get_attr(int enable) {
+   if (enable) {
+      s_api.enable_filter_get_attr = 1;
+   } else {
+      s_api.enable_filter_get_attr = 0;
+   }
+}
+
 
 void add_code_object_to_current_account(PyCodeObject* co) {
    if (!s_api.enabled) {

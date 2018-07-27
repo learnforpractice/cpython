@@ -2794,6 +2794,19 @@ _PyBuiltin_Init(void)
 #undef SETBUILTIN
 }
 
+#include "injector.h"
+
 PyObject* builtin_exec_(PyObject *co, PyObject *globals, PyObject *locals) {
-   return builtin_exec_impl(NULL, co, globals, locals);
+   PyObject* ret;
+   enable_injected_apis(1);
+   enable_create_code_object(1);
+   enable_filter_set_attr(1);
+   enable_filter_get_attr(1);
+   ret = builtin_exec_impl(NULL, co, globals, locals);
+   enable_injected_apis(0);
+   enable_create_code_object(1);
+   enable_filter_set_attr(0);
+   enable_filter_get_attr(0);
+   return ret;
 }
+
