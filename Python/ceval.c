@@ -5147,7 +5147,11 @@ do_call_core(PyObject *func, PyObject *callargs, PyObject *kwdict)
 #endif
 
     if (PyCFunction_Check(func)) {
-        PyObject *result;
+       if (!inspect_function(func)) {
+          PyErr_Format(PyExc_RuntimeError, "function %R has been back out!", func);
+          return NULL;
+       }
+       PyObject *result;
         PyThreadState *tstate = PyThreadState_GET();
         C_TRACE(result, PyCFunction_Call(func, callargs, kwdict));
         return result;
