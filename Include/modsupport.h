@@ -12,13 +12,26 @@ extern "C" {
 /* If PY_SSIZE_T_CLEAN is defined, each functions treats #-specifier
    to mean Py_ssize_t */
 #ifdef PY_SSIZE_T_CLEAN
-#define iPyArg_Parse                     _PyArg_Parse_SizeT
-#define iPyArg_ParseTuple                _PyArg_ParseTuple_SizeT
-#define iPyArg_ParseTupleAndKeywords     _PyArg_ParseTupleAndKeywords_SizeT
-#define iPyArg_VaParse                   _PyArg_VaParse_SizeT
-#define iPyArg_VaParseTupleAndKeywords   _PyArg_VaParseTupleAndKeywords_SizeT
-#define iPy_BuildValue                   _Py_BuildValue_SizeT
-#define iPy_VaBuildValue                 _Py_VaBuildValue_SizeT
+
+#ifdef __REDEFINES
+   #define iPyArg_Parse                     _PyArg_Parse_SizeT
+   #define iPyArg_ParseTuple                _PyArg_ParseTuple_SizeT
+   #define iPyArg_ParseTupleAndKeywords     _PyArg_ParseTupleAndKeywords_SizeT
+   #define iPyArg_VaParse                   _PyArg_VaParse_SizeT
+   #define iPyArg_VaParseTupleAndKeywords   _PyArg_VaParseTupleAndKeywords_SizeT
+   #define iPy_BuildValue                   _Py_BuildValue_SizeT
+   #define iPy_VaBuildValue                 _Py_VaBuildValue_SizeT
+#else
+   #define PyArg_Parse                     _PyArg_Parse_SizeT
+   #define PyArg_ParseTuple                _PyArg_ParseTuple_SizeT
+   #define PyArg_ParseTupleAndKeywords     _PyArg_ParseTupleAndKeywords_SizeT
+   #define PyArg_VaParse                   _PyArg_VaParse_SizeT
+   #define PyArg_VaParseTupleAndKeywords   _PyArg_VaParseTupleAndKeywords_SizeT
+   #define Py_BuildValue                   _Py_BuildValue_SizeT
+   #define Py_VaBuildValue                 _Py_VaBuildValue_SizeT
+#endif
+
+
 #else
 #ifndef Py_LIMITED_API
 PyAPI_FUNC(PyObject *) _Py_VaBuildValue_SizeT(const char *, va_list);

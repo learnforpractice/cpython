@@ -845,8 +845,14 @@ If only globals is given, locals defaults to it.
 
 static int enable_code_execute = 1;
 static int only_once = 0;
-void iPy_EnableCodeExecution(int enable, int _only_once) {
-    enable_code_execute = enable;
+
+#ifdef __REDEFINES
+   void iPy_EnableCodeExecution(int enable, int _only_once) {
+#else
+   void Py_EnableCodeExecution(int enable, int _only_once) {
+#endif
+
+   enable_code_execute = enable;
     only_once = _only_once;
 }
 

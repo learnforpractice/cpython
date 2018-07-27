@@ -30,7 +30,13 @@ typedef struct {
 #define FUTURE_GENERATOR_STOP "generator_stop"
 
 struct _mod; /* Declare the existence of this type */
-#define iPyAST_Compile(mod, s, f, ar) PyAST_CompileEx(mod, s, f, -1, ar)
+
+#ifdef __REDEFINES
+   #define iPyAST_Compile(mod, s, f, ar) PyAST_CompileEx(mod, s, f, -1, ar)
+#else
+   #define PyAST_Compile(mod, s, f, ar) PyAST_CompileEx(mod, s, f, -1, ar)
+#endif
+
 PyAPI_FUNC(PyCodeObject *) PyAST_CompileEx(
     struct _mod *mod,
     const char *filename,       /* decoded from the filesystem encoding */

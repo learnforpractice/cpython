@@ -53,7 +53,13 @@ PyErr_WarnExplicitFormat(PyObject *category,
 
 /* DEPRECATED: Use PyErr_WarnEx() instead. */
 #ifndef Py_LIMITED_API
-#define iPyErr_Warn(category, msg) PyErr_WarnEx(category, msg, 1)
+
+#ifdef __REDEFINES
+   #define iPyErr_Warn(category, msg) PyErr_WarnEx(category, msg, 1)
+#else
+   #define iPyErr_Warn(category, msg) PyErr_WarnEx(category, msg, 1)
+#endif
+
 #endif
 
 #ifdef __cplusplus
