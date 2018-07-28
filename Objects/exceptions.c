@@ -588,15 +588,20 @@ SystemExit_traverse(PySystemExitObject *self, visitproc visit, void *arg)
     return BaseException_traverse((PyBaseExceptionObject *)self, visit, arg);
 }
 
+
 static PyMemberDef SystemExit_members[] = {
     {"code", T_OBJECT, offsetof(PySystemExitObject, code), 0,
         PyDoc_STR("exception code")},
     {NULL}  /* Sentinel */
 };
 
+
+/*
 ComplexExtendsException(PyExc_BaseException, SystemExit, SystemExit,
                         0, 0, SystemExit_members, 0, 0,
                         "Request to exit from the interpreter.");
+*/
+
 
 /*
  *    KeyboardInterrupt extends BaseException
@@ -2528,7 +2533,7 @@ _PyExc_Init(PyObject *bltinmod)
     PRE_INIT(StopAsyncIteration)
     PRE_INIT(StopIteration)
     PRE_INIT(GeneratorExit)
-    PRE_INIT(SystemExit)
+//    PRE_INIT(SystemExit)
     PRE_INIT(KeyboardInterrupt)
     PRE_INIT(ImportError)
     PRE_INIT(ModuleNotFoundError)
@@ -2601,7 +2606,7 @@ _PyExc_Init(PyObject *bltinmod)
     POST_INIT(StopAsyncIteration)
     POST_INIT(StopIteration)
     POST_INIT(GeneratorExit)
-    POST_INIT(SystemExit)
+//    POST_INIT(SystemExit)
     POST_INIT(KeyboardInterrupt)
     POST_INIT(ImportError)
     POST_INIT(ModuleNotFoundError)

@@ -607,10 +607,11 @@ void
 PyErr_PrintEx(int set_sys_last_vars)
 {
     PyObject *exception, *v, *tb, *hook;
-
+#if 0
     if (PyErr_ExceptionMatches(PyExc_SystemExit)) {
         handle_system_exit();
     }
+#endif
     PyErr_Fetch(&exception, &v, &tb);
     if (exception == NULL)
         return;
@@ -639,9 +640,11 @@ PyErr_PrintEx(int set_sys_last_vars)
         result = _PyObject_FastCall(hook, stack, 3);
         if (result == NULL) {
             PyObject *exception2, *v2, *tb2;
+#if 0
             if (PyErr_ExceptionMatches(PyExc_SystemExit)) {
                 handle_system_exit();
             }
+#endif
             PyErr_Fetch(&exception2, &v2, &tb2);
             PyErr_NormalizeException(&exception2, &v2, &tb2);
             /* It should not be possible for exception2 or v2
