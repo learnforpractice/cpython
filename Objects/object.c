@@ -6,9 +6,6 @@
 
 #include "injector.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 _Py_IDENTIFIER(Py_Repr);
 _Py_IDENTIFIER(__bytes__);
@@ -265,6 +262,7 @@ PyObject *
 _PyObject_New(PyTypeObject *tp)
 {
     PyObject *op;
+//    printf("++++++PyObject_New: %s \n", tp->tp_name);
     op = (PyObject *) PyObject_MALLOC(_PyObject_SIZE(tp));
     if (op == NULL)
         return PyErr_NoMemory();
@@ -274,7 +272,9 @@ _PyObject_New(PyTypeObject *tp)
 PyVarObject *
 _PyObject_NewVar(PyTypeObject *tp, Py_ssize_t nitems)
 {
-    PyVarObject *op;
+//   printf("++++++_PyObject_NewVar: %s \n", tp->tp_name);
+
+   PyVarObject *op;
     const size_t size = _PyObject_VAR_SIZE(tp, nitems);
     op = (PyVarObject *) PyObject_MALLOC(size);
     if (op == NULL)
@@ -910,6 +910,13 @@ int object_is_function(PyObject* func) {
    if (!func) {
       return 0;
    }
+   PyTypeObject *tp = Py_TYPE(func);
+
+   printf(" ++++++++object_is_function: tp->tp_name %s\n", tp->tp_name);
+   if (&PyMethodDescr_Type == Py_TYPE(func)) {
+      return 1;
+   }
+
    if (PyCFunction_Check(func)) {
       return 1;
    }
@@ -931,7 +938,11 @@ int filter_attr(PyObject* v, PyObject* name) {
     if (!PyUnicode_Check(name)) {
         return 0;
     }
+    printf("tp->tp_name %s, PyLong_Type %p\n", tp->tp_name, &PyLong_Type);
 
+    if (tp == &PyLong_Type) {
+       return 1;
+    }
     cname = PyUnicode_AsUTF8AndSize(name,&size);
     if (size >= 2 && cname) {
        if (cname[0] == '_' && cname[1] == '_') {
@@ -982,7 +993,11 @@ PyObject_SetAttr(PyObject *v, PyObject *name, PyObject *value)
     Py_INCREF(name);
 
     if (!inspect_setattr(v, name)) {
-       PyErr_Format(PyExc_TypeError, "set attribute name %R not allowed", name);
+       if (value == NULL) {
+          PyErr_Format(PyExc_TypeError, "delete attribute name %R not allowed", name);
+       } else {
+          PyErr_Format(PyExc_TypeError, "set attribute name %R not allowed", name);
+       }
        return -1;
     }
 
@@ -2099,6 +2114,3 @@ _Py_Dealloc(PyObject *op)
 #endif
 #endif
 
-#ifdef __cplusplus
-}
-#endif

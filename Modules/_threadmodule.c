@@ -998,8 +998,9 @@ t_bootstrap(void *boot_raw)
     res = PyEval_CallObjectWithKeywords(
         boot->func, boot->args, boot->keyw);
     if (res == NULL) {
-        if (PyErr_ExceptionMatches(PyExc_SystemExit))
+        if (0) { //PyErr_ExceptionMatches(PyExc_SystemExit))
             PyErr_Clear();
+        }
         else {
             PyObject *file;
             PyObject *exc, *value, *tb;
@@ -1096,7 +1097,7 @@ printed unless the exception is SystemExit.\n");
 static PyObject *
 thread_PyThread_exit_thread(PyObject *self)
 {
-    PyErr_SetNone(PyExc_SystemExit);
+//    PyErr_SetNone(PyExc_SystemExit);
     return NULL;
 }
 

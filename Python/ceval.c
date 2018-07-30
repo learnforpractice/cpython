@@ -2914,7 +2914,11 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             PyObject *name = GETITEM(names, oparg);
             PyObject *owner = TOP();
 
-            if (!inspect_getattr(owner, name)) {
+            PyObject *res = PyObject_GetAttr(owner, name);
+            Py_DECREF(owner);
+            SET_TOP(res);
+
+            if (res && !inspect_getattr(owner, name)) {
                PyErr_Format(PyExc_AttributeError,
                             "inspect_getattr: get attribute '%U' of '%.50s' object has been forbidened ",
                             name, Py_TYPE(owner)->tp_name);
@@ -2923,9 +2927,6 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
                goto error;
             }
 
-            PyObject *res = PyObject_GetAttr(owner, name);
-            Py_DECREF(owner);
-            SET_TOP(res);
             if (res == NULL)
                 goto error;
             DISPATCH();

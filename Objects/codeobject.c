@@ -119,7 +119,7 @@ PyCode_New(int argcount, int kwonlyargcount,
     Py_ssize_t name_size;
     char *_name = PyUnicode_AsUTF8AndSize(name, &name_size);
 
-    printf("++++++++++++PyCode_New %s\n", _name);
+//    printf("++++++++++++PyCode_New %s\n", _name);
 
 
     if (!is_create_code_object_enabled()) {
