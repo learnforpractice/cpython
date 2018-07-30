@@ -49,6 +49,8 @@ struct python_injected_apis {
    void (*memory_trace_realloc)(void* old_ptr, void* new_ptr, size_t new_size);
    void (*memory_trace_free)(void* ptr);
 
+   int (*inspect_memory)();
+
    int (*check_time)();
 };
 
@@ -87,6 +89,8 @@ void memory_trace_stop();
 void memory_trace_alloc(void* ptr, size_t size);
 void memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_size);
 void memory_trace_free(void* ptr);
+
+int inspect_memory();
 
 int check_time();
 

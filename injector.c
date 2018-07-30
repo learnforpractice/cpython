@@ -175,6 +175,13 @@ void memory_trace_free(void* ptr) {
    s_api.memory_trace_free(ptr);
 }
 
+int inspect_memory() {
+   if (!s_api.enabled) {
+      return 1;
+   }
+   return s_api.inspect_memory();
+}
+
 int check_time() {
    if (!s_api.enabled) {
       return 1;

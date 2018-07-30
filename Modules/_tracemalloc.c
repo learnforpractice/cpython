@@ -50,7 +50,7 @@ static struct {
     /* max execution time in microsecond. */
     int max_execution_time;
 
-} tracemalloc_config = {TRACEMALLOC_NOT_INITIALIZED, 0, 1, 0, 1024*1024 ,100*1000};
+} tracemalloc_config = {TRACEMALLOC_NOT_INITIALIZED, 0, 1, 0, 1024*1024 ,5000*1000};
 
 #if defined(TRACE_RAW_MALLOC) && defined(WITH_THREAD)
 /* This lock is needed because tracemalloc_free() is called without
@@ -142,7 +142,7 @@ set_reentrant(int reentrant)
 static int notice = 0;
 
 static int memory_run_out(void) {
-   if (tracemalloc_is_out_off_memory) {
+   if (!inspect_memory()) {
       if (!notice) {
          notice = 1;
          return 1;
@@ -223,7 +223,7 @@ tracemalloc_alloc(int use_calloc, void *ctx, size_t nelem, size_t elsize)
     if (ptr == NULL)
         return NULL;
 
-    memory_trace_alloc(ptr, elsize);
+    memory_trace_alloc(ptr, nelem*elsize);
     return ptr;
 }
 
@@ -318,8 +318,6 @@ tracemalloc_realloc_gil(void *ctx, void *ptr, size_t new_size)
         PyMemAllocatorEx *alloc = (PyMemAllocatorEx *)ctx;
 
         ptr2 = alloc->realloc(alloc->ctx, ptr, new_size);
-        //FIXME: reentrant call
-//        memory_trace_realloc(ptr, ptr2, new_size);
         return ptr2;
     }
 
