@@ -2084,6 +2084,310 @@ _PySys_Init(void)
     return m;
 }
 
+
+
+static PyMethodDef sys_methods2[] = {
+    /* Might as well keep this in alphabetic order */
+    {"callstats", (PyCFunction)PyEval_GetCallStats, METH_NOARGS,
+     callstats_doc},
+    {"_clear_type_cache",       sys_clear_type_cache,     METH_NOARGS,
+     sys_clear_type_cache__doc__},
+    {"_current_frames", sys_current_frames, METH_NOARGS,
+     current_frames_doc},
+    {"displayhook",     sys_displayhook, METH_O, displayhook_doc},
+    {"exc_info",        sys_exc_info, METH_NOARGS, exc_info_doc},
+    {"excepthook",      sys_excepthook, METH_VARARGS, excepthook_doc},
+    {"exit",            sys_exit, METH_VARARGS, exit_doc},
+    {"getdefaultencoding", (PyCFunction)sys_getdefaultencoding,
+     METH_NOARGS, getdefaultencoding_doc},
+#ifdef HAVE_DLOPEN
+    {"getdlopenflags", (PyCFunction)sys_getdlopenflags, METH_NOARGS, getdlopenflags_doc},
+#endif
+    {"getallocatedblocks", (PyCFunction)sys_getallocatedblocks, METH_NOARGS,
+      getallocatedblocks_doc},
+#ifdef COUNT_ALLOCS
+    {"getcounts",       (PyCFunction)sys_getcounts, METH_NOARGS},
+#endif
+#ifdef DYNAMIC_EXECUTION_PROFILE
+    {"getdxp",          _Py_GetDXProfile, METH_VARARGS},
+#endif
+    {"getfilesystemencoding", (PyCFunction)sys_getfilesystemencoding,
+     METH_NOARGS, getfilesystemencoding_doc},
+    { "getfilesystemencodeerrors", (PyCFunction)sys_getfilesystemencodeerrors,
+     METH_NOARGS, getfilesystemencodeerrors_doc },
+#ifdef Py_TRACE_REFS
+    {"getobjects",      _Py_GetObjects, METH_VARARGS},
+#endif
+#ifdef Py_REF_DEBUG
+    {"gettotalrefcount", (PyCFunction)sys_gettotalrefcount, METH_NOARGS},
+#endif
+    {"getrefcount",     (PyCFunction)sys_getrefcount, METH_O, getrefcount_doc},
+    {"getrecursionlimit", (PyCFunction)sys_getrecursionlimit, METH_NOARGS,
+     getrecursionlimit_doc},
+    {"getsizeof",   (PyCFunction)sys_getsizeof,
+     METH_VARARGS | METH_KEYWORDS, getsizeof_doc},
+    {"_getframe", sys_getframe, METH_VARARGS, getframe_doc},
+#ifdef MS_WINDOWS
+    {"getwindowsversion", (PyCFunction)sys_getwindowsversion, METH_NOARGS,
+     getwindowsversion_doc},
+    {"_enablelegacywindowsfsencoding", (PyCFunction)sys_enablelegacywindowsfsencoding,
+     METH_NOARGS, enablelegacywindowsfsencoding_doc },
+#endif /* MS_WINDOWS */
+    {"intern",          sys_intern,     METH_VARARGS, intern_doc},
+    {"is_finalizing",   sys_is_finalizing, METH_NOARGS, is_finalizing_doc},
+#ifdef USE_MALLOPT
+    {"mdebug",          sys_mdebug, METH_VARARGS},
+#endif
+    {"setcheckinterval",        sys_setcheckinterval, METH_VARARGS,
+     setcheckinterval_doc},
+    {"getcheckinterval",        sys_getcheckinterval, METH_NOARGS,
+     getcheckinterval_doc},
+#ifdef WITH_THREAD
+    {"setswitchinterval",       sys_setswitchinterval, METH_VARARGS,
+     setswitchinterval_doc},
+    {"getswitchinterval",       sys_getswitchinterval, METH_NOARGS,
+     getswitchinterval_doc},
+#endif
+#ifdef HAVE_DLOPEN
+    {"setdlopenflags", sys_setdlopenflags, METH_VARARGS,
+     setdlopenflags_doc},
+#endif
+    {"setprofile",      sys_setprofile, METH_O, setprofile_doc},
+    {"getprofile",      sys_getprofile, METH_NOARGS, getprofile_doc},
+    {"setrecursionlimit", sys_setrecursionlimit, METH_VARARGS,
+     setrecursionlimit_doc},
+    {"settrace",        sys_settrace, METH_O, settrace_doc},
+    {"gettrace",        sys_gettrace, METH_NOARGS, gettrace_doc},
+    {"call_tracing", sys_call_tracing, METH_VARARGS, call_tracing_doc},
+    {"_debugmallocstats", sys_debugmallocstats, METH_NOARGS,
+     debugmallocstats_doc},
+    {"set_coroutine_wrapper", sys_set_coroutine_wrapper, METH_O,
+     set_coroutine_wrapper_doc},
+    {"get_coroutine_wrapper", sys_get_coroutine_wrapper, METH_NOARGS,
+     get_coroutine_wrapper_doc},
+    {"set_asyncgen_hooks", (PyCFunction)sys_set_asyncgen_hooks,
+     METH_VARARGS | METH_KEYWORDS, set_asyncgen_hooks_doc},
+    {"get_asyncgen_hooks", sys_get_asyncgen_hooks, METH_NOARGS,
+     get_asyncgen_hooks_doc},
+    {NULL,              NULL}           /* sentinel */
+};
+
+
+static struct PyModuleDef sysmodule2 = {
+    PyModuleDef_HEAD_INIT,
+    "sys",
+    sys_doc,
+    -1, /* multiple "initialization" just copies the module dict. */
+    sys_methods2,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+
+PyObject *
+_PySys_Init2(void)
+{
+    PyObject *m, *sysdict, *version_info;
+    int res;
+
+    m = PyModule_Create(&sysmodule2);
+    if (m == NULL)
+        return NULL;
+    sysdict = PyModule_GetDict(m);
+#define SET_SYS_FROM_STRING_BORROW(key, value)             \
+    do {                                                   \
+        PyObject *v = (value);                             \
+        if (v == NULL)                                     \
+            return NULL;                                   \
+        res = PyDict_SetItemString(sysdict, key, v);       \
+        if (res < 0) {                                     \
+            return NULL;                                   \
+        }                                                  \
+    } while (0)
+#define SET_SYS_FROM_STRING(key, value)                    \
+    do {                                                   \
+        PyObject *v = (value);                             \
+        if (v == NULL)                                     \
+            return NULL;                                   \
+        res = PyDict_SetItemString(sysdict, key, v);       \
+        Py_DECREF(v);                                      \
+        if (res < 0) {                                     \
+            return NULL;                                   \
+        }                                                  \
+    } while (0)
+
+    /* Check that stdin is not a directory
+    Using shell redirection, you can redirect stdin to a directory,
+    crashing the Python interpreter. Catch this common mistake here
+    and output a useful error message. Note that under MS Windows,
+    the shell already prevents that. */
+#if !defined(MS_WINDOWS)
+    {
+        struct _Py_stat_struct sb;
+        if (_Py_fstat_noraise(fileno(stdin), &sb) == 0 &&
+            S_ISDIR(sb.st_mode)) {
+            /* There's nothing more we can do. */
+            /* Py_FatalError() will core dump, so just exit. */
+            PySys_WriteStderr("Python error: <stdin> is a directory, cannot continue\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+#endif
+
+    /* stdin/stdout/stderr are set in pylifecycle.c */
+
+    SET_SYS_FROM_STRING_BORROW("__displayhook__",
+                               PyDict_GetItemString(sysdict, "displayhook"));
+    SET_SYS_FROM_STRING_BORROW("__excepthook__",
+                               PyDict_GetItemString(sysdict, "excepthook"));
+    SET_SYS_FROM_STRING("version",
+                         PyUnicode_FromString(Py_GetVersion()));
+    SET_SYS_FROM_STRING("hexversion",
+                         PyLong_FromLong(PY_VERSION_HEX));
+    SET_SYS_FROM_STRING("_git",
+                        Py_BuildValue("(szz)", "CPython", _Py_gitidentifier(),
+                                      _Py_gitversion()));
+    SET_SYS_FROM_STRING("dont_write_bytecode",
+                         PyBool_FromLong(Py_DontWriteBytecodeFlag));
+    SET_SYS_FROM_STRING("api_version",
+                        PyLong_FromLong(PYTHON_API_VERSION));
+    SET_SYS_FROM_STRING("copyright",
+                        PyUnicode_FromString(Py_GetCopyright()));
+    SET_SYS_FROM_STRING("platform",
+                        PyUnicode_FromString(Py_GetPlatform()));
+    SET_SYS_FROM_STRING("executable",
+                        PyUnicode_FromWideChar(
+                               Py_GetProgramFullPath(), -1));
+    SET_SYS_FROM_STRING("prefix",
+                        PyUnicode_FromWideChar(Py_GetPrefix(), -1));
+    SET_SYS_FROM_STRING("exec_prefix",
+                        PyUnicode_FromWideChar(Py_GetExecPrefix(), -1));
+    SET_SYS_FROM_STRING("base_prefix",
+                        PyUnicode_FromWideChar(Py_GetPrefix(), -1));
+    SET_SYS_FROM_STRING("base_exec_prefix",
+                        PyUnicode_FromWideChar(Py_GetExecPrefix(), -1));
+    SET_SYS_FROM_STRING("maxsize",
+                        PyLong_FromSsize_t(PY_SSIZE_T_MAX));
+    SET_SYS_FROM_STRING("float_info",
+                        PyFloat_GetInfo());
+    SET_SYS_FROM_STRING("int_info",
+                        PyLong_GetInfo());
+    /* initialize hash_info */
+    if (Hash_InfoType.tp_name == NULL) {
+        if (PyStructSequence_InitType2(&Hash_InfoType, &hash_info_desc) < 0)
+            return NULL;
+    }
+    SET_SYS_FROM_STRING("hash_info",
+                        get_hash_info());
+    SET_SYS_FROM_STRING("maxunicode",
+                        PyLong_FromLong(0x10FFFF));
+    SET_SYS_FROM_STRING("builtin_module_names",
+                        list_builtin_module_names());
+#if PY_BIG_ENDIAN
+    SET_SYS_FROM_STRING("byteorder",
+                        PyUnicode_FromString("big"));
+#else
+    SET_SYS_FROM_STRING("byteorder",
+                        PyUnicode_FromString("little"));
+#endif
+
+#ifdef MS_COREDLL
+    SET_SYS_FROM_STRING("dllhandle",
+                        PyLong_FromVoidPtr(PyWin_DLLhModule));
+    SET_SYS_FROM_STRING("winver",
+                        PyUnicode_FromString(PyWin_DLLVersionString));
+#endif
+#ifdef ABIFLAGS
+    SET_SYS_FROM_STRING("abiflags",
+                        PyUnicode_FromString(ABIFLAGS));
+#endif
+    if (warnoptions == NULL) {
+        warnoptions = PyList_New(0);
+        if (warnoptions == NULL)
+            return NULL;
+    }
+    else {
+        Py_INCREF(warnoptions);
+    }
+    SET_SYS_FROM_STRING_BORROW("warnoptions", warnoptions);
+
+    SET_SYS_FROM_STRING_BORROW("_xoptions", get_xoptions());
+
+    /* version_info */
+    if (VersionInfoType.tp_name == NULL) {
+        if (PyStructSequence_InitType2(&VersionInfoType,
+                                       &version_info_desc) < 0)
+            return NULL;
+    }
+    version_info = make_version_info();
+    SET_SYS_FROM_STRING("version_info", version_info);
+    /* prevent user from creating new instances */
+    VersionInfoType.tp_init = NULL;
+    VersionInfoType.tp_new = NULL;
+    res = PyDict_DelItemString(VersionInfoType.tp_dict, "__new__");
+    if (res < 0 && PyErr_ExceptionMatches(PyExc_KeyError))
+        PyErr_Clear();
+
+    /* implementation */
+    SET_SYS_FROM_STRING("implementation", make_impl_info(version_info));
+
+    /* flags */
+    if (FlagsType.tp_name == 0) {
+        if (PyStructSequence_InitType2(&FlagsType, &flags_desc) < 0)
+            return NULL;
+    }
+    SET_SYS_FROM_STRING("flags", make_flags());
+    /* prevent user from creating new instances */
+    FlagsType.tp_init = NULL;
+    FlagsType.tp_new = NULL;
+    res = PyDict_DelItemString(FlagsType.tp_dict, "__new__");
+    if (res < 0 && PyErr_ExceptionMatches(PyExc_KeyError))
+        PyErr_Clear();
+
+#if defined(MS_WINDOWS)
+    /* getwindowsversion */
+    if (WindowsVersionType.tp_name == 0)
+        if (PyStructSequence_InitType2(&WindowsVersionType,
+                                       &windows_version_desc) < 0)
+            return NULL;
+    /* prevent user from creating new instances */
+    WindowsVersionType.tp_init = NULL;
+    WindowsVersionType.tp_new = NULL;
+    res = PyDict_DelItemString(WindowsVersionType.tp_dict, "__new__");
+    if (res < 0 && PyErr_ExceptionMatches(PyExc_KeyError))
+        PyErr_Clear();
+#endif
+
+    /* float repr style: 0.03 (short) vs 0.029999999999999999 (legacy) */
+#ifndef PY_NO_SHORT_FLOAT_REPR
+    SET_SYS_FROM_STRING("float_repr_style",
+                        PyUnicode_FromString("short"));
+#else
+    SET_SYS_FROM_STRING("float_repr_style",
+                        PyUnicode_FromString("legacy"));
+#endif
+
+#ifdef WITH_THREAD
+    SET_SYS_FROM_STRING("thread_info", PyThread_GetInfo());
+#endif
+
+    /* initialize asyncgen_hooks */
+    if (AsyncGenHooksType.tp_name == NULL) {
+        if (PyStructSequence_InitType2(
+                &AsyncGenHooksType, &asyncgen_hooks_desc) < 0) {
+            return NULL;
+        }
+    }
+
+#undef SET_SYS_FROM_STRING
+#undef SET_SYS_FROM_STRING_BORROW
+    if (PyErr_Occurred())
+        return NULL;
+    return m;
+}
+
+
 static PyObject *
 makepathobject(const wchar_t *path, wchar_t delim)
 {
