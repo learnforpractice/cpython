@@ -2097,14 +2097,13 @@ static PyMethodDef sys_methods2[] = {
     {"displayhook",     sys_displayhook, METH_O, displayhook_doc},
     {"exc_info",        sys_exc_info, METH_NOARGS, exc_info_doc},
     {"excepthook",      sys_excepthook, METH_VARARGS, excepthook_doc},
-    {"exit",            sys_exit, METH_VARARGS, exit_doc},
+//    {"exit",            sys_exit, METH_VARARGS, exit_doc},
     {"getdefaultencoding", (PyCFunction)sys_getdefaultencoding,
      METH_NOARGS, getdefaultencoding_doc},
 #ifdef HAVE_DLOPEN
-    {"getdlopenflags", (PyCFunction)sys_getdlopenflags, METH_NOARGS, getdlopenflags_doc},
+//    {"getdlopenflags", (PyCFunction)sys_getdlopenflags, METH_NOARGS, getdlopenflags_doc},
 #endif
-    {"getallocatedblocks", (PyCFunction)sys_getallocatedblocks, METH_NOARGS,
-      getallocatedblocks_doc},
+//    {"getallocatedblocks", (PyCFunction)sys_getallocatedblocks, METH_NOARGS, getallocatedblocks_doc},
 #ifdef COUNT_ALLOCS
     {"getcounts",       (PyCFunction)sys_getcounts, METH_NOARGS},
 #endif
@@ -2124,9 +2123,8 @@ static PyMethodDef sys_methods2[] = {
     {"getrefcount",     (PyCFunction)sys_getrefcount, METH_O, getrefcount_doc},
     {"getrecursionlimit", (PyCFunction)sys_getrecursionlimit, METH_NOARGS,
      getrecursionlimit_doc},
-    {"getsizeof",   (PyCFunction)sys_getsizeof,
-     METH_VARARGS | METH_KEYWORDS, getsizeof_doc},
-    {"_getframe", sys_getframe, METH_VARARGS, getframe_doc},
+    {"getsizeof",   (PyCFunction)sys_getsizeof, METH_VARARGS | METH_KEYWORDS, getsizeof_doc},
+//    {"_getframe", sys_getframe, METH_VARARGS, getframe_doc},
 #ifdef MS_WINDOWS
     {"getwindowsversion", (PyCFunction)sys_getwindowsversion, METH_NOARGS,
      getwindowsversion_doc},
@@ -2138,10 +2136,8 @@ static PyMethodDef sys_methods2[] = {
 #ifdef USE_MALLOPT
     {"mdebug",          sys_mdebug, METH_VARARGS},
 #endif
-    {"setcheckinterval",        sys_setcheckinterval, METH_VARARGS,
-     setcheckinterval_doc},
-    {"getcheckinterval",        sys_getcheckinterval, METH_NOARGS,
-     getcheckinterval_doc},
+//    {"setcheckinterval",        sys_setcheckinterval, METH_VARARGS, setcheckinterval_doc},
+//    {"getcheckinterval",        sys_getcheckinterval, METH_NOARGS, getcheckinterval_doc},
 #ifdef WITH_THREAD
     {"setswitchinterval",       sys_setswitchinterval, METH_VARARGS,
      setswitchinterval_doc},
@@ -2149,26 +2145,21 @@ static PyMethodDef sys_methods2[] = {
      getswitchinterval_doc},
 #endif
 #ifdef HAVE_DLOPEN
-    {"setdlopenflags", sys_setdlopenflags, METH_VARARGS,
-     setdlopenflags_doc},
+//    {"setdlopenflags", sys_setdlopenflags, METH_VARARGS, setdlopenflags_doc},
 #endif
-    {"setprofile",      sys_setprofile, METH_O, setprofile_doc},
-    {"getprofile",      sys_getprofile, METH_NOARGS, getprofile_doc},
-    {"setrecursionlimit", sys_setrecursionlimit, METH_VARARGS,
-     setrecursionlimit_doc},
-    {"settrace",        sys_settrace, METH_O, settrace_doc},
-    {"gettrace",        sys_gettrace, METH_NOARGS, gettrace_doc},
-    {"call_tracing", sys_call_tracing, METH_VARARGS, call_tracing_doc},
-    {"_debugmallocstats", sys_debugmallocstats, METH_NOARGS,
-     debugmallocstats_doc},
-    {"set_coroutine_wrapper", sys_set_coroutine_wrapper, METH_O,
-     set_coroutine_wrapper_doc},
-    {"get_coroutine_wrapper", sys_get_coroutine_wrapper, METH_NOARGS,
-     get_coroutine_wrapper_doc},
-    {"set_asyncgen_hooks", (PyCFunction)sys_set_asyncgen_hooks,
-     METH_VARARGS | METH_KEYWORDS, set_asyncgen_hooks_doc},
-    {"get_asyncgen_hooks", sys_get_asyncgen_hooks, METH_NOARGS,
-     get_asyncgen_hooks_doc},
+//    {"setprofile",      sys_setprofile, METH_O, setprofile_doc},
+//    {"getprofile",      sys_getprofile, METH_NOARGS, getprofile_doc},
+//    {"setrecursionlimit", sys_setrecursionlimit, METH_VARARGS, setrecursionlimit_doc},
+//    {"settrace",        sys_settrace, METH_O, settrace_doc},
+//    {"gettrace",        sys_gettrace, METH_NOARGS, gettrace_doc},
+//    {"call_tracing", sys_call_tracing, METH_VARARGS, call_tracing_doc},
+//    {"_debugmallocstats", sys_debugmallocstats, METH_NOARGS, debugmallocstats_doc},
+//    {"set_coroutine_wrapper", sys_set_coroutine_wrapper, METH_O, set_coroutine_wrapper_doc},
+//    {"get_coroutine_wrapper", sys_get_coroutine_wrapper, METH_NOARGS, get_coroutine_wrapper_doc},
+//    {"set_asyncgen_hooks", (PyCFunction)sys_set_asyncgen_hooks,
+//     METH_VARARGS | METH_KEYWORDS, set_asyncgen_hooks_doc},
+//    {"get_asyncgen_hooks", sys_get_asyncgen_hooks, METH_NOARGS,
+//     get_asyncgen_hooks_doc},
     {NULL,              NULL}           /* sentinel */
 };
 
@@ -2237,8 +2228,8 @@ _PySys_Init2(void)
 
     /* stdin/stdout/stderr are set in pylifecycle.c */
 
-    SET_SYS_FROM_STRING_BORROW("__displayhook__",
-                               PyDict_GetItemString(sysdict, "displayhook"));
+//    SET_SYS_FROM_STRING_BORROW("__displayhook__",
+//                               PyDict_GetItemString(sysdict, "displayhook"));
     SET_SYS_FROM_STRING_BORROW("__excepthook__",
                                PyDict_GetItemString(sysdict, "excepthook"));
     SET_SYS_FROM_STRING("version",
