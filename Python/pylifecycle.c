@@ -855,6 +855,101 @@ handle_error:
     return NULL;
 }
 
+PyObject *_PySys_Init2(void);
+
+PyThreadState *
+Py_NewInterpreterEx(void)
+{
+    PyInterpreterState *interp;
+    PyThreadState *tstate, *save_tstate;
+    PyObject *bimod, *sysmod;
+
+    if (!initialized)
+        Py_FatalError("Py_NewInterpreter: call Py_Initialize first");
+
+#ifdef WITH_THREAD
+    /* Issue #10915, #15751: The GIL API doesn't work with multiple
+       interpreters: disable PyGILState_Check(). */
+    _PyGILState_check_enabled = 0;
+#endif
+
+    interp = PyInterpreterState_New();
+    if (interp == NULL)
+        return NULL;
+
+    tstate = PyThreadState_New(interp);
+    if (tstate == NULL) {
+        PyInterpreterState_Delete(interp);
+        return NULL;
+    }
+
+    save_tstate = PyThreadState_Swap(tstate);
+
+    /* XXX The following is lax in error checking */
+
+    interp->modules = PyDict_New();
+
+    bimod = _PyImport_FindBuiltin("builtins");
+    if (bimod != NULL) {
+        interp->builtins = PyModule_GetDict(bimod);
+        if (interp->builtins == NULL)
+            goto handle_error;
+        Py_INCREF(interp->builtins);
+    }
+
+    /* initialize builtin exceptions */
+    _PyExc_Init(bimod);
+
+//    sysmod = _PyImport_FindBuiltin("sys");
+    sysmod = _PySys_Init2();
+    if (bimod != NULL && sysmod != NULL) {
+        PyObject *pstderr;
+
+        interp->sysdict = PyModule_GetDict(sysmod);
+        if (interp->sysdict == NULL)
+            goto handle_error;
+        Py_INCREF(interp->sysdict);
+        PySys_SetPath(Py_GetPath());
+        PyDict_SetItemString(interp->sysdict, "modules",
+                             interp->modules);
+        /* Set up a preliminary stderr printer until we have enough
+           infrastructure for the io module in place. */
+        pstderr = PyFile_NewStdPrinter(fileno(stderr));
+        if (pstderr == NULL)
+            Py_FatalError("Py_Initialize: can't set preliminary stderr");
+        _PySys_SetObjectId(&PyId_stderr, pstderr);
+        PySys_SetObject("__stderr__", pstderr);
+        Py_DECREF(pstderr);
+
+        _PyImportHooks_Init();
+
+        import_init(interp, sysmod);
+
+        if (initfsencoding(interp) < 0)
+            goto handle_error;
+
+        if (initstdio() < 0)
+            Py_FatalError(
+                "Py_Initialize: can't initialize sys standard streams");
+        initmain(interp);
+        if (!Py_NoSiteFlag)
+            initsite();
+    }
+
+    if (!PyErr_Occurred())
+        return tstate;
+
+handle_error:
+    /* Oops, it didn't work.  Undo it all. */
+
+    PyErr_PrintEx(0);
+    PyThreadState_Clear(tstate);
+    PyThreadState_Swap(save_tstate);
+    PyThreadState_Delete(tstate);
+    PyInterpreterState_Delete(interp);
+
+    return NULL;
+}
 /* Delete an interpreter and its last thread.  This requires that the
    given thread state is current, that the thread has no remaining
    frames, and that it is its interpreter's only remaining thread.
