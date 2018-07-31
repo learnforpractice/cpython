@@ -41,10 +41,5 @@ def load_module(co, module_dict):
 
 @debug
 def apply(mod, receiver, account, action):
-    print('+++++++++++vm.apply')
-    try:
-        mod.apply(receiver, account, action)
-    except Exception as e:
-        print('+++vm_apply',e)
-        return 0
+    mod.apply(receiver, account, action)
     return 1
