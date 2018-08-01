@@ -11,6 +11,8 @@
 
 #include <ctype.h>
 
+#include "injector.h"
+
 #ifdef HAVE_LANGINFO_H
 #include <langinfo.h>   /* CODESET */
 #endif
@@ -209,6 +211,7 @@ error:
     Py_DECREF(meta);
     Py_XDECREF(mkw);
     Py_DECREF(bases);
+    inspect_build_class(cls);
     return cls;
 }
 

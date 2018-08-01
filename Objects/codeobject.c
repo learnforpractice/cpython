@@ -119,11 +119,11 @@ PyCode_New(int argcount, int kwonlyargcount,
     Py_ssize_t name_size;
     char *_name = PyUnicode_AsUTF8AndSize(name, &name_size);
 
-//    printf("++++++++++++PyCode_New %s\n", _name);
+    printf("++++++++++++PyCode_New %s\n", _name);
 
 
     if (!is_create_code_object_enabled()) {
-       PyErr_Format(PyExc_RuntimeError, "new code not allowed %R", name);
+       PyErr_Format(PyExc_RuntimeError, "create new code object does not allowed %R", name);
        return NULL;
     }
 

@@ -2357,6 +2357,13 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             int err;
             STACKADJ(-2);
 
+            if (!inspect_setattr(owner, name)) {
+               PyErr_Format(PyExc_TypeError, "set attribute name %R not allowed", name);
+               Py_DECREF(v);
+               Py_DECREF(owner);
+               goto error;
+            }
+
             err = PyObject_SetAttr(owner, name, v);
             Py_DECREF(v);
             Py_DECREF(owner);
@@ -2368,6 +2375,12 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
         TARGET(DELETE_ATTR) {
             PyObject *name = GETITEM(names, oparg);
             PyObject *owner = POP();
+            if (!inspect_setattr(owner, name)) {
+               PyErr_Format(PyExc_TypeError, "delete attribute name %R not allowed", name);
+               Py_DECREF(owner);
+               goto error;
+            }
+
             int err;
             err = PyObject_SetAttr(owner, name, (PyObject *)NULL);
             Py_DECREF(owner);
@@ -2920,8 +2933,8 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 
             if (res && !inspect_getattr(owner, name)) {
                PyErr_Format(PyExc_AttributeError,
-                            "inspect_getattr: get attribute '%U' of '%.50s' object has been forbidened ",
-                            name, Py_TYPE(owner)->tp_name);
+                            "inspect_getattr: get attribute '%U' of '%.50s' object has been forbidened %p %p",
+                            name, Py_TYPE(owner)->tp_name, Py_TYPE(owner), owner);
                Py_DECREF(owner);
                SET_TOP(NULL);
                goto error;

@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-PyFrameObject* PyEval_GetCurrentFrame();
+PyFrameObject* PyEval_GetCurrentFrame(void);
 
 struct python_injected_apis {
    int enabled;
@@ -41,20 +41,21 @@ struct python_injected_apis {
    int (*is_code_object_in_current_account)(PyCodeObject* co);
 
    int (*inspect_opcode)(int opcode);
+   int (*inspect_build_class)(PyObject* cls);
 
-   void (*memory_trace_start)();
-   void (*memory_trace_stop)();
+   void (*memory_trace_start)(void);
+   void (*memory_trace_stop)(void);
 
    void (*memory_trace_alloc)(void* ptr, size_t new_size);
    void (*memory_trace_realloc)(void* old_ptr, void* new_ptr, size_t new_size);
    void (*memory_trace_free)(void* ptr);
 
-   int (*inspect_memory)();
+   int (*inspect_memory)(void);
 
-   int (*check_time)();
+   int (*check_time)(void);
 };
 
-struct python_injected_apis* get_injected_apis();
+struct python_injected_apis* get_injected_apis(void);
 
 void enable_injected_apis(int enabled);
 
@@ -68,6 +69,8 @@ int inspect_setattr(PyObject* v, PyObject* name);
 int inspect_getattr(PyObject* v, PyObject* name);
 int inspect_opcode(int opcode);
 
+int inspect_build_class(PyObject* cls);
+
 void enable_create_code_object(int enable);
 void enable_filter_set_attr(int enable);
 void enable_filter_get_attr(int enable);
@@ -75,24 +78,24 @@ void enable_opcode_inspector(int enable);
 
 
 void inspect_set_status(int status);
-int inspect_get_status();
+int inspect_get_status(void);
 
-int is_create_code_object_enabled();
+int is_create_code_object_enabled(void);
 
 void add_code_object_to_current_account(PyCodeObject* co);
-int is_current_code_object_in_current_account();
+int is_current_code_object_in_current_account(void);
 
 
 
-void memory_trace_start();
-void memory_trace_stop();
+void memory_trace_start(void);
+void memory_trace_stop(void);
 void memory_trace_alloc(void* ptr, size_t size);
 void memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_size);
 void memory_trace_free(void* ptr);
 
-int inspect_memory();
+int inspect_memory(void);
 
-int check_time();
+int check_time(void);
 
 #ifdef __cplusplus
 }

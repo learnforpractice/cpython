@@ -67,6 +67,14 @@ int inspect_opcode(int opcode) {
    return ret;
 }
 
+int inspect_build_class(PyObject* cls) {
+   if (!s_api.enabled) {
+      return 1;
+   }
+   return s_api.inspect_build_class(cls);
+}
+
+
 void enable_opcode_inspector(int enable) {
    if (enable) {
       s_api.enable_opcode_inspect = 1;
@@ -105,7 +113,7 @@ void enable_filter_get_attr(int enable) {
 
 
 void add_code_object_to_current_account(PyCodeObject* co) {
-   if (!s_api.enabled) {
+   if (!s_api.enable_create_code_object) {
       return;
    }
    s_api.add_code_object_to_current_account(co);

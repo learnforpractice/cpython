@@ -39,7 +39,6 @@ def debug(func):
 def load_module(co, module_dict):
     inspector.builtin_exec(co, module_dict, module_dict)
 
-@debug
 def apply(mod, receiver, account, action):
     mod.apply(receiver, account, action)
     return 1

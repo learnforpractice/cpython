@@ -912,7 +912,7 @@ int object_is_function(PyObject* func) {
    }
    PyTypeObject *tp = Py_TYPE(func);
 
-   printf(" ++++++++object_is_function: tp->tp_name %s\n", tp->tp_name);
+//   printf(" ++++++++object_is_function: tp->tp_name %s\n", tp->tp_name);
    if (&PyMethodDescr_Type == Py_TYPE(func)) {
       return 1;
    }
@@ -938,14 +938,14 @@ int filter_attr(PyObject* v, PyObject* name) {
     if (!PyUnicode_Check(name)) {
         return 0;
     }
-    printf("tp->tp_name %s, PyLong_Type %p\n", tp->tp_name, &PyLong_Type);
+//    printf("tp->tp_name %s, PyLong_Type %p\n", tp->tp_name, &PyLong_Type);
 
-    if (tp == &PyLong_Type) {
-       return 1;
-    }
     cname = PyUnicode_AsUTF8AndSize(name,&size);
     if (size >= 2 && cname) {
        if (cname[0] == '_' && cname[1] == '_') {
+          if (strcmp(cname, "__init__") == 0) {
+             return 1;
+          }
           return 0;
        }
     }
@@ -991,15 +991,6 @@ PyObject_SetAttr(PyObject *v, PyObject *name, PyObject *value)
     }
 
     Py_INCREF(name);
-
-    if (!inspect_setattr(v, name)) {
-       if (value == NULL) {
-          PyErr_Format(PyExc_TypeError, "delete attribute name %R not allowed", name);
-       } else {
-          PyErr_Format(PyExc_TypeError, "set attribute name %R not allowed", name);
-       }
-       return -1;
-    }
 
     PyUnicode_InternInPlace(&name);
     if (tp->tp_setattro != NULL) {
