@@ -2927,11 +2927,7 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             PyObject *name = GETITEM(names, oparg);
             PyObject *owner = TOP();
 
-            PyObject *res = PyObject_GetAttr(owner, name);
-            Py_DECREF(owner);
-            SET_TOP(res);
-
-            if (res && !inspect_getattr(owner, name)) {
+            if (!inspect_getattr(owner, name)) {
                PyErr_Format(PyExc_AttributeError,
                             "inspect_getattr: get attribute '%U' of '%.50s' object has been forbidened %p %p",
                             name, Py_TYPE(owner)->tp_name, Py_TYPE(owner), owner);
@@ -2939,6 +2935,11 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
                SET_TOP(NULL);
                goto error;
             }
+
+            PyObject *res = PyObject_GetAttr(owner, name);
+            Py_DECREF(owner);
+            SET_TOP(res);
+
 
             if (res == NULL)
                 goto error;
@@ -4899,7 +4900,7 @@ call_function(PyObject ***pp_stack, Py_ssize_t oparg, PyObject *kwnames)
 
     if (PyCFunction_Check(func)) {
        if (!inspect_function(func)) {
-          PyErr_Format(PyExc_RuntimeError, "function %R has been back out!", func);
+          PyErr_Format(PyExc_RuntimeError, "function %R has been black out!", func);
           return NULL;
        }
 
