@@ -12,33 +12,8 @@ add_custom_command(
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/eos/cython/pydebug.pyx
 )
 
-set(PYTHON_SS_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libpython3.6m.a")
+#./configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist --without-threads
 
-add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
-    COMMAND python pre_config.py "${OPENSSL_ROOT}"
-    COMMAND bash configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist --without-threads
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "configure python3.6.3-single-thread"
-#    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/configure
-)
-
-add_custom_command(
-    OUTPUT ${PYTHON_SS_LIB}
-    COMMAND make ${BUILD_FLAGS}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "make python3.6.3-single-thread"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
-    # ${CMAKE_CURRENT_SOURCE_DIR}/injector.c ${CMAKE_CURRENT_SOURCE_DIR}/injector.h
-)
-
-add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/dummy.c
-    COMMAND touch ${CMAKE_CURRENT_SOURCE_DIR}/dummy.c
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "build python3.6.3-single-thread"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
-)
 
 add_library( python3-ss
           STATIC
@@ -52,7 +27,7 @@ add_library( python3-ss
          Modules/_io/_iomodule.c
          Modules/_io/bufferedio.c
          Modules/_io/bytesio.c
-#         Modules/_io/fileio.c
+         Modules/_io/fileio.c
          Modules/_io/iobase.c
          Modules/_io/stringio.c
          Modules/_io/textio.c
@@ -72,7 +47,7 @@ add_library( python3-ss
          Modules/faulthandler.c
          Modules/gcmodule.c
          Modules/getbuildinfo.c
-#         Modules/getpath.c
+         Modules/getpath.c
          Modules/hashtable.c
          Modules/itertoolsmodule.c
          Modules/main.c
@@ -166,7 +141,7 @@ add_library( python3-ss
          Python/getversion.c
          Python/graminit.c
          Python/import.c
-         Python/importdl.c
+#         Python/importdl.c
          Python/marshal.c
          Python/modsupport.c
          Python/mysnprintf.c
@@ -194,7 +169,6 @@ add_library( python3-ss
 
          ${CMAKE_CURRENT_SOURCE_DIR}/eos/wrap/pydebug.wrap.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
-         ${PYTHON_SS_LIB}
 )
 
 #-DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes    -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers   -I. -I./Include    -DPy_BUILD_CORE -o Objects/abstract.o Objects/abstract.c
@@ -202,9 +176,9 @@ add_library( python3-ss
 target_compile_options(python3-ss PUBLIC -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes    -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers  -DPy_BUILD_CORE)
 
 if (APPLE)
-    target_link_libraries( python3-ss PUBLIC ${PYTHON_SS_LIB} ${OPENSSL_LIBRARIES} intl)
+    target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES} intl)
 else()
-    target_link_libraries( python3-ss PUBLIC ${PYTHON_SS_LIB} ${OPENSSL_LIBRARIES})
+    target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES})
 endif()
 
 target_include_directories( python3-ss

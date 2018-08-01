@@ -101,6 +101,13 @@
 #endif
 
 
+#define PREFIX ""
+#define EXEC_PREFIX ""
+#define VERSION "3.6.3"
+#define VPATH ""
+#define PYTHONPATH ""
+
+
 #if !defined(PREFIX) || !defined(EXEC_PREFIX) || !defined(VERSION) || !defined(VPATH)
 #error "PREFIX, EXEC_PREFIX, VERSION, and VPATH must be constant defined"
 #endif
