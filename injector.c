@@ -190,6 +190,21 @@ int inspect_memory() {
    return s_api.inspect_memory();
 }
 
+int inspect_obj_creation(PyTypeObject* type) {
+   if (!s_api.enable_inspect_obj_creation) {
+      return 1;
+   }
+   return s_api.inspect_obj_creation(type);
+}
+
+void enable_inspect_obj_creation(int enable) {
+   if (enable) {
+      s_api.enable_inspect_obj_creation = 1;
+   } else {
+      s_api.enable_inspect_obj_creation = 0;
+   }
+}
+
 int check_time() {
    if (!s_api.enabled) {
       return 1;

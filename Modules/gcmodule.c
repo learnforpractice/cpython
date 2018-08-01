@@ -1748,7 +1748,11 @@ _PyObject_GC_Calloc(size_t basicsize)
 PyObject *
 _PyObject_GC_New(PyTypeObject *tp)
 {
-    PyObject *op = _PyObject_GC_Malloc(_PyObject_SIZE(tp));
+   if (!inspect_obj_creation(tp)) {
+      return NULL;
+   }
+
+   PyObject *op = _PyObject_GC_Malloc(_PyObject_SIZE(tp));
     if (op != NULL)
         op = PyObject_INIT(op, tp);
     return op;
@@ -1764,6 +1768,11 @@ _PyObject_GC_NewVar(PyTypeObject *tp, Py_ssize_t nitems)
         PyErr_BadInternalCall();
         return NULL;
     }
+
+    if (!inspect_obj_creation(tp)) {
+       return NULL;
+    }
+
     size = _PyObject_VAR_SIZE(tp, nitems);
     op = (PyVarObject *) _PyObject_GC_Malloc(size);
     if (op != NULL)

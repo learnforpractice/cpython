@@ -23,6 +23,7 @@ struct python_injected_apis {
    int enable_create_code_object;
    int enable_filter_set_attr;
    int enable_filter_get_attr;
+   int enable_inspect_obj_creation;
 
    int status;
 
@@ -51,6 +52,7 @@ struct python_injected_apis {
    void (*memory_trace_free)(void* ptr);
 
    int (*inspect_memory)(void);
+   int (*inspect_obj_creation)(PyTypeObject* type);
 
    int (*check_time)(void);
 };
@@ -94,6 +96,8 @@ void memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_size);
 void memory_trace_free(void* ptr);
 
 int inspect_memory(void);
+int inspect_obj_creation(PyTypeObject* type);
+void enable_inspect_obj_creation(int enable);
 
 int check_time(void);
 

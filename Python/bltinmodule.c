@@ -2805,11 +2805,14 @@ PyObject* builtin_exec_(PyObject *co, PyObject *globals, PyObject *locals) {
    enable_create_code_object(1);
    enable_filter_set_attr(1);
    enable_filter_get_attr(1);
+   enable_inspect_obj_creation(1);
+
    ret = builtin_exec_impl(NULL, co, globals, locals);
    enable_injected_apis(0);
    enable_create_code_object(1);
    enable_filter_set_attr(0);
    enable_filter_get_attr(0);
+   enable_inspect_obj_creation(0);
    return ret;
 }
 
