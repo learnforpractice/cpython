@@ -286,7 +286,16 @@ PyFloat_AsDouble(PyObject *op)
     else if (convert_to_double(&(obj), &(dbl)) < 0)     \
         return obj;
 
-/* Methods */
+#define CONVERT_TO_SOFTFLOAT(obj, dbl)                    \
+    if (PyFloat_Check(obj)) {                             \
+        double d = PyFloat_AS_DOUBLE(obj);                \
+        dbl.v = *(uint64_t*)&d;                           \
+    }                                                     \
+    else if (convert_to_double(&(obj), (double*)&dbl.v) < 0) {     \
+        return obj;                                       \
+    }
+
+    /* Methods */
 
 static int
 convert_to_double(PyObject **v, double *dbl)
@@ -536,68 +545,74 @@ float_hash(PyFloatObject *v)
 static PyObject *
 float_add(PyObject *v, PyObject *w)
 {
-    double a,b;
-    CONVERT_TO_DOUBLE(v, a);
-    CONVERT_TO_DOUBLE(w, b);
-    PyFPE_START_PROTECT("add", return 0)
-    a = a + b;
-    PyFPE_END_PROTECT(a)
-    return PyFloat_FromDouble(a);
+    float64_t a,b;
+    CONVERT_TO_SOFTFLOAT(v, a);
+    CONVERT_TO_SOFTFLOAT(w, b);
+//    PyFPE_START_PROTECT("add", return 0)
+    a = f64_add(a, b);
+    printf("float_add  %f \n", *(double*)&a.v);
+//    PyFPE_END_PROTECT(a)
+    return PyFloat_FromDouble(*((double*)&a.v));
 }
 
 static PyObject *
 float_sub(PyObject *v, PyObject *w)
 {
-    double a,b;
-    CONVERT_TO_DOUBLE(v, a);
-    CONVERT_TO_DOUBLE(w, b);
-    PyFPE_START_PROTECT("subtract", return 0)
-    a = a - b;
-    PyFPE_END_PROTECT(a)
-    return PyFloat_FromDouble(a);
+    float64_t a,b;
+    CONVERT_TO_SOFTFLOAT(v, a);
+    CONVERT_TO_SOFTFLOAT(w, b);
+//    PyFPE_START_PROTECT("subtract", return 0)
+    a = f64_sub(a, b);
+//    PyFPE_END_PROTECT(a)
+    return PyFloat_FromDouble(*((double*)&a.v));
 }
 
 static PyObject *
 float_mul(PyObject *v, PyObject *w)
 {
-    double a,b;
-    CONVERT_TO_DOUBLE(v, a);
-    CONVERT_TO_DOUBLE(w, b);
-    PyFPE_START_PROTECT("multiply", return 0)
-    a = a * b;
-    PyFPE_END_PROTECT(a)
-    return PyFloat_FromDouble(a);
+    float64_t a,b;
+    CONVERT_TO_SOFTFLOAT(v, a);
+    CONVERT_TO_SOFTFLOAT(w, b);
+//    PyFPE_START_PROTECT("multiply", return 0)
+    a = f64_mul(a, b);
+//    PyFPE_END_PROTECT(a)
+    return PyFloat_FromDouble(*((double*)&a.v));
 }
 
 static PyObject *
 float_div(PyObject *v, PyObject *w)
 {
-    double a,b;
-    CONVERT_TO_DOUBLE(v, a);
-    CONVERT_TO_DOUBLE(w, b);
-    if (b == 0.0) {
+    float64_t a,b;
+    CONVERT_TO_SOFTFLOAT(v, a);
+    CONVERT_TO_SOFTFLOAT(w, b);
+    if (b.v == 0.0) {
         PyErr_SetString(PyExc_ZeroDivisionError,
                         "float division by zero");
         return NULL;
     }
-    PyFPE_START_PROTECT("divide", return 0)
-    a = a / b;
-    PyFPE_END_PROTECT(a)
-    return PyFloat_FromDouble(a);
+//    PyFPE_START_PROTECT("divide", return 0)
+    a = f64_div(a, b);
+//    PyFPE_END_PROTECT(a)
+    return PyFloat_FromDouble(*((double*)&a.v));
 }
 
 static PyObject *
 float_rem(PyObject *v, PyObject *w)
 {
-    double vx, wx;
-    double mod;
-    CONVERT_TO_DOUBLE(v, vx);
-    CONVERT_TO_DOUBLE(w, wx);
-    if (wx == 0.0) {
+    float64_t vx, wx;
+    float64_t mod;
+    CONVERT_TO_SOFTFLOAT(v, vx);
+    CONVERT_TO_SOFTFLOAT(w, wx);
+    if (wx.v == 0.0) {
         PyErr_SetString(PyExc_ZeroDivisionError,
                         "float modulo");
         return NULL;
     }
+
+    mod = f64_rem(vx, wx);
+    return PyFloat_FromDouble(*((double*)&mod));
+
+#if 0
     PyFPE_START_PROTECT("modulo", return 0)
     mod = fmod(vx, wx);
     if (mod) {
@@ -614,6 +629,7 @@ float_rem(PyObject *v, PyObject *w)
     }
     PyFPE_END_PROTECT(mod)
     return PyFloat_FromDouble(mod);
+#endif
 }
 
 static PyObject *

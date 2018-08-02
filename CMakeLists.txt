@@ -75,7 +75,8 @@ add_library( python3-ss
          Objects/enumobject.c
          Objects/exceptions.c
          Objects/fileobject.c
-         Objects/floatobject.c
+#         Objects/floatobject.c
+         Objects/softfloatobject.c
          Objects/frameobject.c
          Objects/funcobject.c
          Objects/genobject.c
@@ -167,6 +168,7 @@ add_library( python3-ss
          Python/thread.c
          Python/traceback.c
 
+         softfloat/softfloat.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/eos/wrap/pydebug.wrap.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
 )
@@ -176,9 +178,9 @@ add_library( python3-ss
 target_compile_options(python3-ss PUBLIC -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes    -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers  -DPy_BUILD_CORE)
 
 if (APPLE)
-    target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES} intl)
+    target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES} intl softfloat)
 else()
-    target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES})
+    target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES} softfloat)
 endif()
 
 target_include_directories( python3-ss

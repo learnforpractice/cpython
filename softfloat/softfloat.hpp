@@ -43,11 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef softfloat_h
 #define softfloat_h 1
 
-//#include "cvdef.h"
+#include "cvdef.h"
 
-#include <stdint.h>
-
-#define CV_EXPORTS
 
 namespace cv
 {

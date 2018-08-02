@@ -88,7 +88,7 @@ namespace cv { namespace debug_build_guard { } using namespace debug_build_guard
 #undef Complex
 
 #include <limits.h>
-#include "opencv2/core/hal/interface.h"
+#include "interface.h"
 
 #if defined __ICL
 #  define CV_ICC   __ICL
@@ -199,7 +199,7 @@ enum CpuFeatures {
 };
 
 
-#include "cv_cpu_dispatch.h"
+//#include "cv_cpu_dispatch.h"
 
 
 /* fundamental constants */
@@ -245,8 +245,8 @@ Cv32suf;
 
 typedef union Cv64suf
 {
-    int64 i;
-    uint64 u;
+    int64_t i;
+    uint64_t u;
     double f;
 }
 Cv64suf;

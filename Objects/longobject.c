@@ -2868,6 +2868,10 @@ PyLong_AsDouble(PyObject *v)
         */
         return (double)MEDIUM_VALUE((PyLongObject *)v);
     }
+
+    PyErr_SetString(PyExc_OverflowError, "int too large to convert to float");
+    return -1.0;
+
     x = _PyLong_Frexp((PyLongObject *)v, &exponent);
     if ((x == -1.0 && PyErr_Occurred()) || exponent > DBL_MAX_EXP) {
         PyErr_SetString(PyExc_OverflowError,

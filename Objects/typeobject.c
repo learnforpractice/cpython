@@ -891,7 +891,7 @@ type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
        caller loses its exception */
     assert(!PyErr_Occurred());
 #endif
-    printf("++++type_call: %s\n", type->tp_name);
+//    printf("++++type_call: %s\n", type->tp_name);
     if (!inspect_obj_creation(type)) {
        printf("++++cannot create '%.100s' instances\n", type->tp_name);
        PyErr_Format(PyExc_TypeError, "cannot create '%.100s' instances", type->tp_name);
