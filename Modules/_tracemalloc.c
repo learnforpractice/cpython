@@ -186,7 +186,7 @@ static int exit_eval_frame_check(void) {
    }
    if (memory_run_out()) {
       printf("++++++++++memory out! exit_eval_frame\n");
-      PyErr_Format(PyExc_RuntimeError, "memory run out!!!");
+      PyErr_Format(PyExc_MemoryError, "memory run out!!!");
       return 1;
    }
    return 0;

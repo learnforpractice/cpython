@@ -9,7 +9,7 @@
 #include "structmember.h"
 #include <ctype.h>
 
-static PyTypeObject PyStructType;
+PyTypeObject PyStructType;
 
 /* The translation function for each format character is table driven */
 typedef struct _formatdef {
@@ -1987,7 +1987,7 @@ static PyGetSetDef s_getsetlist[] = {
     {NULL} /* sentinel */
 };
 
-static
+
 PyTypeObject PyStructType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "Struct",
