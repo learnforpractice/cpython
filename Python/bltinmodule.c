@@ -2760,14 +2760,14 @@ _PyBuiltin_Init(void)
     SETBUILTIN("False",                 Py_False);
     SETBUILTIN("True",                  Py_True);
     SETBUILTIN("bool",                  &PyBool_Type);
-    SETBUILTIN("memoryview",        &PyMemoryView_Type);
+//    SETBUILTIN("memoryview",        &PyMemoryView_Type);
     SETBUILTIN("bytearray",             &PyByteArray_Type);
     SETBUILTIN("bytes",                 &PyBytes_Type);
     SETBUILTIN("classmethod",           &PyClassMethod_Type);
-    SETBUILTIN("complex",               &PyComplex_Type);
+//    SETBUILTIN("complex",               &PyComplex_Type);
     SETBUILTIN("dict",                  &PyDict_Type);
-    SETBUILTIN("enumerate",             &PyEnum_Type);
-    SETBUILTIN("filter",                &PyFilter_Type);
+//    SETBUILTIN("enumerate",             &PyEnum_Type);
+//    SETBUILTIN("filter",                &PyFilter_Type);
     SETBUILTIN("float",                 &PyFloat_Type);
     SETBUILTIN("frozenset",             &PyFrozenSet_Type);
     SETBUILTIN("property",              &PyProperty_Type);
