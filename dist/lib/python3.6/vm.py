@@ -11,6 +11,7 @@ for _dict in [db.__dict__, eoslib.__dict__, struct.__dict__, int.__dict__]:
             inspector.add_function_to_white_list(v)
 
 whitelist = [    str,
+                 pow,
                  ''.format,
                  list, dict, int,
                  int.from_bytes,
