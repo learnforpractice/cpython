@@ -10,6 +10,10 @@
 #include <float.h>
 #include "softfloat.h"
 
+float64_t softfloat_pow(float64_t x, float64_t y);
+double softfloat_abs( double x);
+double softfloat_round( double a);
+
 /* Special free list
    free_list is a singly-linked list of available PyFloatObjects, linked
    via abuse of their ob_type members.
@@ -352,6 +356,7 @@ float_repr(PyFloatObject *v)
 static PyObject*
 float_richcompare(PyObject *v, PyObject *w, int op)
 {
+    float64_t f1,f2;
     double i, j;
     int r = 0;
 
@@ -509,24 +514,26 @@ float_richcompare(PyObject *v, PyObject *w, int op)
 
  Compare:
     PyFPE_START_PROTECT("richcompare", return NULL)
+    f1.v = *(uint64_t*)&i;
+    f2.v = *(uint64_t*)&j;
     switch (op) {
     case Py_EQ:
-        r = i == j;
+        r = f64_eq(f1, f2);
         break;
     case Py_NE:
-        r = i != j;
+        r = !f64_eq(f1, f2);
         break;
     case Py_LE:
-        r = i <= j;
+        r = f64_le(f1, f2);
         break;
     case Py_GE:
-        r = i >= j;
+        r = f64_le(f2, f1);
         break;
     case Py_LT:
-        r = i < j;
+        r = f64_lt(f1, f2);
         break;
     case Py_GT:
-        r = i > j;
+        r = f64_lt(f2, f1);
         break;
     }
     PyFPE_END_PROTECT(r)
@@ -701,7 +708,23 @@ float_floor_div(PyObject *v, PyObject *w)
 static PyObject *
 float_pow(PyObject *v, PyObject *w, PyObject *z)
 {
-    double iv, iw, ix;
+   {
+      float64_t iv, iw, ix;
+      int negate_result = 0;
+
+      if ((PyObject *)z != Py_None) {
+          PyErr_SetString(PyExc_TypeError, "pow() 3rd argument not "
+              "allowed unless all arguments are integers");
+          return NULL;
+      }
+
+      CONVERT_TO_SOFTFLOAT(v, iv);
+      CONVERT_TO_SOFTFLOAT(w, iw);
+      ix = softfloat_pow(iv, iw);
+      return PyFloat_FromDouble(*(double*)&ix.v);
+   }
+
+   double iv, iw, ix;
     int negate_result = 0;
 
     if ((PyObject *)z != Py_None) {
@@ -825,13 +848,18 @@ float_pow(PyObject *v, PyObject *w, PyObject *z)
 static PyObject *
 float_neg(PyFloatObject *v)
 {
-    return PyFloat_FromDouble(-v->ob_fval);
+    float64_t f1, f2, f3;
+    f1.v = 0;
+    f2.v = v->ob_fval;
+    f3 = f64_sub(f1, f2);
+    return PyFloat_FromDouble(*(double*)&f3.v);
 }
 
 static PyObject *
 float_abs(PyFloatObject *v)
 {
-    return PyFloat_FromDouble(fabs(v->ob_fval));
+    double d = softfloat_abs(v->ob_fval);
+    return PyFloat_FromDouble(d);
 }
 
 static int
@@ -1047,7 +1075,7 @@ float_round(PyObject *v, PyObject *args)
     if (o_ndigits == NULL || o_ndigits == Py_None) {
         /* single-argument round or with None ndigits:
          * round to nearest integer */
-        rounded = round(x);
+        rounded = softfloat_round(x);
         if (fabs(x-rounded) == 0.5)
             /* halfway case: round to even */
             rounded = 2.0*round(x/2.0);
