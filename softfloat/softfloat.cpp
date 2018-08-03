@@ -4324,4 +4324,26 @@ static float64_t f64_cos( float64_t x )
     }
 }
 
+
+extern "C" uint64_t softfloat_pow( uint64_t x, uint64_t y) {
+   float64_t x1, y1, z1;
+   x1.v = x;
+   y1.v = y;
+   z1 = f64_pow(x1, y1);
+   return z1.v;
 }
+
+extern "C" uint64_t softfloat_abs( uint64_t x) {
+   float64_t x1, y1;
+   x1.v = x;
+   y1.v = abs(x1);
+   return y1.v;
+}
+
+extern "C" float64_t softfloat_round( float64_t a) {
+   return  f64_roundToInt(a, round_near_even, false);
+}
+
+
+}
+
