@@ -50,7 +50,7 @@ static struct {
     /* max execution time in microsecond. */
     int max_execution_time;
 
-} tracemalloc_config = {TRACEMALLOC_NOT_INITIALIZED, 0, 1, 0, 1024*1024 ,5000*1000};
+} tracemalloc_config = {TRACEMALLOC_NOT_INITIALIZED, 0, 1, 0, 1024*1024 ,200*1000};
 
 #if defined(TRACE_RAW_MALLOC) && defined(WITH_THREAD)
 /* This lock is needed because tracemalloc_free() is called without
