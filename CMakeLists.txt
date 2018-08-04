@@ -20,6 +20,7 @@ add_library( python3-ss
          Modules/_struct.c
 
          injector.c
+         Modules/config.c
          Modules/_codecsmodule.c
          Modules/_collectionsmodule.c
          Modules/_functoolsmodule.c
