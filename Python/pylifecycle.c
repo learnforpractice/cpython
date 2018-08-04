@@ -1316,11 +1316,13 @@ initstdio(void)
     }
 
     /* Set builtins.open */
+#if 0
     if (PyObject_SetAttrString(bimod, "open", wrapper) == -1) {
         Py_DECREF(wrapper);
         goto error;
     }
     Py_DECREF(wrapper);
+#endif
 
     encoding = _Py_StandardStreamEncoding;
     errors = _Py_StandardStreamErrors;
