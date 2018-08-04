@@ -994,9 +994,11 @@ builtin_exec_impl(PyObject *module, PyObject *source, PyObject *globals,
             locals->ob_type->tp_name);
         return NULL;
     }
+
+
     if (_PyDict_GetItemId(globals, &PyId___builtins__) == NULL) {
-        if (_PyDict_SetItemId(globals, &PyId___builtins__,
-                              PyEval_GetBuiltins()) != 0)
+        PyObject* builtins = PyDict_Copy(PyEval_GetBuiltins());
+        if (_PyDict_SetItemId(globals, &PyId___builtins__, builtins) != 0)
             return NULL;
     }
 
