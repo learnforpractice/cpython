@@ -43,3 +43,6 @@ def load_module(co, module_dict):
 def apply(mod, receiver, account, action):
     mod.apply(receiver, account, action)
     return 1
+
+def call(mod, func):
+    mod.call(func)
