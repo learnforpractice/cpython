@@ -176,7 +176,7 @@ add_library( python3-ss
 
 #-DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes    -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers   -I. -I./Include    -DPy_BUILD_CORE -o Objects/abstract.o Objects/abstract.c
 
-target_compile_options(python3-ss PUBLIC -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes    -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers  -DPy_BUILD_CORE)
+target_compile_options(python3-ss PRIVATE -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes    -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers  -DPy_BUILD_CORE)
 
 if (APPLE)
     target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES} intl softfloat)
