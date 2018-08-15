@@ -14,7 +14,7 @@ class Struct "PyStructObject *" "&PyStructType"
 [clinic start generated code]*/
 /*[clinic end generated code: output=da39a3ee5e6b4b0d input=9b032058a83ed7c3]*/
 
-static PyTypeObject PyStructType;
+PyTypeObject PyStructType;
 
 /* The translation function for each format character is table driven */
 typedef struct _formatdef {
@@ -1999,7 +1999,6 @@ static PyGetSetDef s_getsetlist[] = {
     {NULL} /* sentinel */
 };
 
-static
 PyTypeObject PyStructType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "Struct",

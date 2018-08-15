@@ -188,8 +188,12 @@ _PyLong_FromNbInt(PyObject *integral)
 /* Allocate a new int object with size digits.
    Return NULL and set exception if we run out of memory. */
 
+/*
 #define MAX_LONG_DIGITS \
     ((PY_SSIZE_T_MAX - offsetof(PyLongObject, ob_digit))/sizeof(digit))
+*/
+
+#define MAX_LONG_DIGITS 512 //512*4 bytes long
 
 PyLongObject *
 _PyLong_New(Py_ssize_t size)
@@ -5370,7 +5374,7 @@ static PyNumberMethods long_as_number = {
     0,                          /* nb_inplace_xor */
     0,                          /* nb_inplace_or */
     long_div,                   /* nb_floor_divide */
-    long_true_divide,           /* nb_true_divide */
+    long_div, //long_true_divide,           /* nb_true_divide */
     0,                          /* nb_inplace_floor_divide */
     0,                          /* nb_inplace_true_divide */
     long_long,                  /* nb_index */

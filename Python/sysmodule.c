@@ -341,6 +341,7 @@ sys_exit(PyObject *self, PyObject *args)
     if (!PyArg_UnpackTuple(args, "exit", 0, 1, &exit_code))
         return NULL;
     /* Raise SystemExit so callers may catch it or clean up. */
+
     PyErr_SetObject(PyExc_SystemExit, exit_code);
     return NULL;
 }

@@ -92,6 +92,9 @@ intern_string_constants(PyObject *tuple)
     return modified;
 }
 
+#ifdef PYTHON_SS
+#include "injector.h"
+#endif
 
 PyCodeObject *
 PyCode_New(int argcount, int kwonlyargcount,
@@ -105,6 +108,12 @@ PyCode_New(int argcount, int kwonlyargcount,
     Py_ssize_t *cell2arg = NULL;
     Py_ssize_t i, n_cellvars;
 
+#ifdef PYTHON_SS
+    if (!is_create_code_object_enabled()) {
+       PyErr_Format(PyExc_RuntimeError, "create new code object does not allowed %R", name);
+       return NULL;
+    }
+#endif
     /* Check argument types */
     if (argcount < 0 || kwonlyargcount < 0 || nlocals < 0 ||
         code == NULL || !PyBytes_Check(code) ||
@@ -206,6 +215,11 @@ PyCode_New(int argcount, int kwonlyargcount,
     co->co_zombieframe = NULL;
     co->co_weakreflist = NULL;
     co->co_extra = NULL;
+
+#ifdef PYTHON_SS
+    add_code_object_to_current_account(co);
+#endif
+
     return co;
 }
 

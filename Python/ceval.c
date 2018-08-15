@@ -21,6 +21,9 @@
 #include "structmember.h"
 
 #include <ctype.h>
+#ifdef PYTHON_SS
+#include "injector.h"
+#endif
 
 #ifdef Py_DEBUG
 /* For debugging the interpreter: */
@@ -547,6 +550,26 @@ PyEval_EvalFrameEx(PyFrameObject *f, int throwflag)
     return tstate->interp->eval_frame(f, throwflag);
 }
 
+typedef int (*fn_check)(void);
+
+static fn_check exit_eval_frame_check = NULL;
+
+fn_check set_exit_eval_frame_check(fn_check func) {
+   fn_check old = exit_eval_frame_check;
+   exit_eval_frame_check = func;
+   return old;
+}
+
+static PyFrameObject* current_frame = NULL;
+
+void PyEval_SetCurrentFrame(PyFrameObject *f) {
+   current_frame = f;
+}
+
+PyFrameObject *PyEval_GetCurrentFrame() {
+   return current_frame;
+}
+
 PyObject* _Py_HOT_FUNCTION
 _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 {
@@ -562,6 +585,8 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
     PyObject *retval = NULL;            /* Return value */
     PyThreadState *tstate = PyThreadState_GET();
     PyCodeObject *co;
+
+    PyEval_SetCurrentFrame(f);
 
     /* when tracing we set things up so that
 
@@ -636,13 +661,23 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
     #define USE_COMPUTED_GOTOS 0
 #endif
 
+#ifdef PYTHON_SS
+#define EXIT_EVAL_FRAME_CHECK() \
+   if (exit_eval_frame_check && exit_eval_frame_check()) { \
+   goto exit_eval_frame; \
+   }
+#else
+   #define EXIT_EVAL_FRAME_CHECK()
+#endif
+
 #if USE_COMPUTED_GOTOS
 /* Import the static jump table */
 #include "opcode_targets.h"
 
 #define TARGET(op) \
     TARGET_##op: \
-    case op:
+    case op: \
+    EXIT_EVAL_FRAME_CHECK()
 
 #define DISPATCH() \
     { \
@@ -2005,6 +2040,14 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             PyObject *v = SECOND();
             int err;
             STACKADJ(-2);
+#ifdef PYTHON_SS
+            if (!inspect_setattr(owner, name)) {
+               PyErr_Format(PyExc_TypeError, "set attribute name %R not allowed", name);
+               Py_DECREF(v);
+               Py_DECREF(owner);
+               goto error;
+            }
+#endif
             err = PyObject_SetAttr(owner, name, v);
             Py_DECREF(v);
             Py_DECREF(owner);
@@ -2016,7 +2059,16 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
         TARGET(DELETE_ATTR) {
             PyObject *name = GETITEM(names, oparg);
             PyObject *owner = POP();
+
+#ifdef PYTHON_SS
+            if (!inspect_setattr(owner, name)) {
+               PyErr_Format(PyExc_TypeError, "delete attribute name %R not allowed", name);
+               Py_DECREF(owner);
+               goto error;
+            }
+#endif
             int err;
+
             err = PyObject_SetAttr(owner, name, (PyObject *)NULL);
             Py_DECREF(owner);
             if (err != 0)
@@ -2563,6 +2615,16 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
         TARGET(LOAD_ATTR) {
             PyObject *name = GETITEM(names, oparg);
             PyObject *owner = TOP();
+#ifdef PYTHON_SS
+            if (!inspect_getattr(owner, name)) {
+               PyErr_Format(PyExc_AttributeError,
+                            "inspect_getattr: get attribute '%U' of '%.50s' object has been forbidened %p %p",
+                            name, Py_TYPE(owner)->tp_name, Py_TYPE(owner), owner);
+               Py_DECREF(owner);
+               SET_TOP(NULL);
+               goto error;
+            }
+#endif
             PyObject *res = PyObject_GetAttr(owner, name);
             Py_DECREF(owner);
             SET_TOP(res);
@@ -3489,6 +3551,8 @@ exit_eval_frame:
     Py_LeaveRecursiveCall();
     f->f_executing = 0;
     tstate->frame = f->f_back;
+
+    PyEval_SetCurrentFrame(NULL);
 
     return _Py_CheckFunctionResult(NULL, retval, "PyEval_EvalFrameEx");
 }
@@ -4543,7 +4607,13 @@ call_function(PyObject ***pp_stack, Py_ssize_t oparg, PyObject *kwnames)
        presumed to be the most frequent callable object.
     */
     if (PyCFunction_Check(func)) {
-        PyThreadState *tstate = PyThreadState_GET();
+#ifdef PYTHON_SS
+       if (!inspect_function(func)) {
+          PyErr_Format(PyExc_RuntimeError, "function %R has been black out!", func);
+          return NULL;
+       }
+#endif
+       PyThreadState *tstate = PyThreadState_GET();
         C_TRACE(x, _PyCFunction_FastCallKeywords(func, stack, nargs, kwnames));
     }
     else if (Py_TYPE(func) == &PyMethodDescr_Type) {

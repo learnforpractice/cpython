@@ -1555,6 +1555,7 @@ PyInit_gc(void)
     ADD_INT(DEBUG_SAVEALL);
     ADD_INT(DEBUG_LEAK);
 #undef ADD_INT
+    _PyRuntime.gc.enabled = 0;
     return m;
 }
 
@@ -1777,3 +1778,8 @@ PyObject_GC_Del(void *op)
     }
     PyObject_FREE(g);
 }
+
+int PyObject_GC_GetCount() {
+   return _PyRuntime.gc.generations[0].count;
+}
+

@@ -11,6 +11,10 @@
 
 #include <ctype.h>
 
+#ifdef PYTHON_SS
+#include "injector.h"
+#endif
+
 /* The default encoding used by the platform file system APIs
    Can remain NULL for all platforms that don't have such a concept
 
@@ -290,6 +294,9 @@ error:
     if (bases != orig_bases) {
         Py_DECREF(orig_bases);
     }
+#ifdef PYTHON_SS
+    inspect_build_class(cls);
+#endif
     return cls;
 }
 
@@ -2859,3 +2866,29 @@ _PyBuiltin_Init(void)
 #undef ADD_TO_ALL
 #undef SETBUILTIN
 }
+
+#ifdef PYTHON_SS
+
+#include "injector.h"
+
+PyObject* builtin_exec_(PyObject *co, PyObject *globals, PyObject *locals) {
+   PyObject* ret;
+   enable_injected_apis(1);
+   enable_create_code_object(1);
+   enable_filter_set_attr(1);
+   enable_filter_get_attr(1);
+   enable_inspect_obj_creation(1);
+
+   ret = builtin_exec_impl(NULL, co, globals, locals);
+   enable_injected_apis(0);
+   enable_create_code_object(1);
+   enable_filter_set_attr(0);
+   enable_filter_get_attr(0);
+   enable_inspect_obj_creation(0);
+   return ret;
+}
+
+
+#endif
+
+

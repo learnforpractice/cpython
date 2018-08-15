@@ -906,6 +906,9 @@ type_repr(PyTypeObject *type)
     Py_DECREF(name);
     return rtn;
 }
+#ifdef PYTHON_SS
+   #include "injector.h"
+#endif
 
 static PyObject *
 type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
@@ -924,6 +927,14 @@ type_call(PyTypeObject *type, PyObject *args, PyObject *kwds)
        because it can clear it (directly or indirectly) and so the
        caller loses its exception */
     assert(!PyErr_Occurred());
+#endif
+
+#ifdef PYTHON_SS
+    if (!inspect_obj_creation(type)) {
+       printf("++++cannot create '%.100s' instances\n", type->tp_name);
+       PyErr_Format(PyExc_TypeError, "cannot create '%.100s' instances", type->tp_name);
+       return NULL;
+    }
 #endif
 
     obj = type->tp_new(type, args, kwds);

@@ -991,8 +991,12 @@ t_bootstrap(void *boot_raw)
     tstate->interp->num_threads++;
     res = PyObject_Call(boot->func, boot->args, boot->keyw);
     if (res == NULL) {
-        if (PyErr_ExceptionMatches(PyExc_SystemExit))
-            PyErr_Clear();
+#ifdef PYTHON_SS
+       if (0)
+#else
+       if (PyErr_ExceptionMatches(PyExc_SystemExit))
+#endif
+          PyErr_Clear();
         else {
             PyObject *file;
             PyObject *exc, *value, *tb;
@@ -1089,7 +1093,9 @@ printed unless the exception is SystemExit.\n");
 static PyObject *
 thread_PyThread_exit_thread(PyObject *self)
 {
+#ifndef PYTHON_SS
     PyErr_SetNone(PyExc_SystemExit);
+#endif
     return NULL;
 }
 

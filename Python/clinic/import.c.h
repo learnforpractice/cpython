@@ -261,7 +261,6 @@ exit:
 }
 
 #if defined(HAVE_DYNAMIC_LOADING)
-
 PyDoc_STRVAR(_imp_create_dynamic__doc__,
 "create_dynamic($module, spec, file=None, /)\n"
 "--\n"
@@ -291,7 +290,6 @@ _imp_create_dynamic(PyObject *module, PyObject *const *args, Py_ssize_t nargs)
 exit:
     return return_value;
 }
-
 #endif /* defined(HAVE_DYNAMIC_LOADING) */
 
 #if defined(HAVE_DYNAMIC_LOADING)
