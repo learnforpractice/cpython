@@ -78,7 +78,7 @@ add_library( python3-ss
           STATIC
          Modules/_struct.c
 
-         injector.c
+         inspector.cpp
 
          Modules/config.c
          Modules/_threadmodule.c
@@ -246,7 +246,7 @@ add_library( python3-ss
 
 set(PYTHON_FLAGS -DNDEBUG -DPYTHON_SS -DPy_BUILD_CORE -DPREFIX="" -DEXEC_PREFIX="" -DVERSION="3.7" -DVPATH="" -DPYTHONPATH="")
 
-target_compile_options(python3-ss PRIVATE ${PYTHON_FLAGS} -g -fwrapv -O3 -Wall -Wstrict-prototypes -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers )
+target_compile_options(python3-ss PRIVATE ${PYTHON_FLAGS} -g -msoft-float -m64 -fwrapv -O3 -Wall -Wstrict-prototypes -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers )
 
 if (APPLE)
     target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES} intl softfloat)
@@ -259,6 +259,7 @@ add_dependencies(python3-ss python3)
 target_include_directories( python3-ss
                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include
                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+                            PRIVATE ${CMAKE_SOURCE_DIR}/contracts
                             )
 
 INSTALL( TARGETS

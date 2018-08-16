@@ -21,8 +21,9 @@
 #include "structmember.h"
 
 #include <ctype.h>
+
 #ifdef PYTHON_SS
-#include "injector.h"
+#include "inspector.h"
 #endif
 
 #ifdef Py_DEBUG
@@ -4794,6 +4795,13 @@ import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *leve
     _Py_IDENTIFIER(__import__);
     PyObject *import_func, *res;
     PyObject* stack[5];
+
+#ifdef PYTHON_SS
+    if (!inspect_import_name(name)) {
+       PyErr_Format(PyExc_ImportError, "cannot import name %R", name);
+       return NULL;
+    }
+#endif
 
     import_func = _PyDict_GetItemId(f->f_builtins, &PyId___import__);
     if (import_func == NULL) {

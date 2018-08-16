@@ -1,3 +1,4 @@
+#include "../inspector.h"
 #include "Python.h"
 #include "hashtable.h"
 #include "frameobject.h"
@@ -7,43 +8,6 @@
 #include "clinic/_tracemalloc.c.h"
 
 #include "objimpl.h"
-#include "injector.h"
-
-static int notice = 0;
-
-static int memory_run_out(void) {
-   if (!inspect_memory()) {
-      if (!notice) {
-         notice = 1;
-         return 1;
-      }
-   } else {
-      notice = 0;
-   }
-   return 0;
-}
-
-static int exit_eval_frame_check(void) {
-   if (!check_time()) {
-      PyErr_Format(PyExc_RuntimeError, "time out!!!");
-      return 1;
-   }
-   if (memory_run_out()) {
-      PyGC_Collect();
-      memory_trace_stop();
-      printf("++++++++++memory out! exit_eval_frame\n");
-      PyErr_Format(PyExc_MemoryError, "memory run out!!!");
-      return 1;
-   }
-   return 0;
-}
-
-typedef int (*fn_check)(void);
-
-static fn_check old_check = NULL;
-
-extern fn_check set_exit_eval_frame_check(fn_check func);
-
 
 #define MAX_NFRAME 10
 
@@ -403,8 +367,7 @@ tracemalloc_start(int max_nframe)
 
     /* everything is ready: start tracing Python memory allocations */
     tracemalloc_config.tracing = 1;
-    old_check = set_exit_eval_frame_check((void*)exit_eval_frame_check);
-    notice = 0;
+    memory_trace_start();
     return 0;
 }
 
@@ -413,7 +376,6 @@ tracemalloc_stop(void)
 {
     if (!tracemalloc_config.tracing)
         return;
-
     /* stop tracing Python memory allocations */
     tracemalloc_config.tracing = 0;
 

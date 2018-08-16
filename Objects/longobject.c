@@ -5374,7 +5374,11 @@ static PyNumberMethods long_as_number = {
     0,                          /* nb_inplace_xor */
     0,                          /* nb_inplace_or */
     long_div,                   /* nb_floor_divide */
+#ifdef PYTHON_SS
     long_div, //long_true_divide,           /* nb_true_divide */
+#else
+    long_true_divide,           /* nb_true_divide */
+#endif
     0,                          /* nb_inplace_floor_divide */
     0,                          /* nb_inplace_true_divide */
     long_long,                  /* nb_index */

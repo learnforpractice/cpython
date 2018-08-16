@@ -1,4 +1,5 @@
 # added for local development
+dist
 .buildaix/
 Modules/python.exp
 buildaix/
