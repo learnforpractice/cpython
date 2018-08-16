@@ -10,6 +10,7 @@ string get_c_string(PyObject* s);
 int py_inspect_getattr(PyObject* v, PyObject* name);
 int py_inspect_setattr(PyObject* v, PyObject* name);
 int py_inspect_function(PyObject* func);
+int cy_is_class_in_current_account(PyObject* obj);
 
 extern "C" {
    extern PyTypeObject PyStructType;
@@ -154,9 +155,9 @@ inspector::inspector() {
 
    type_whitelist_map[&PyBaseObject_Type] = 1;
    type_whitelist_map[&PyType_Type] = 1;
-   type_whitelist_map[&_PyWeakref_RefType] = 1;
-   type_whitelist_map[&_PyWeakref_CallableProxyType] = 1;
-   type_whitelist_map[&_PyWeakref_ProxyType] = 1;
+//   type_whitelist_map[&_PyWeakref_RefType] = 1;
+//   type_whitelist_map[&_PyWeakref_CallableProxyType] = 1;
+//   type_whitelist_map[&_PyWeakref_ProxyType] = 1;
    type_whitelist_map[&PyLong_Type] = 1;
    type_whitelist_map[&PyBool_Type] = 1;
    type_whitelist_map[&PyByteArray_Type] = 1;
@@ -182,37 +183,37 @@ inspector::inspector() {
    type_whitelist_map[&PyStaticMethod_Type] = 1;
    type_whitelist_map[&PyComplex_Type] = 1;
    type_whitelist_map[&PyFloat_Type] = 1;
-   type_whitelist_map[&PyFrozenSet_Type] = 1;
+//   type_whitelist_map[&PyFrozenSet_Type] = 1;
    type_whitelist_map[&PyProperty_Type] = 1;
-   type_whitelist_map[&_PyManagedBuffer_Type] = 1;
+//   type_whitelist_map[&_PyManagedBuffer_Type] = 1;
    type_whitelist_map[&PyMemoryView_Type] = 1;
    type_whitelist_map[&PyTuple_Type] = 1;
    type_whitelist_map[&PyEnum_Type] = 1;
-   type_whitelist_map[&PyReversed_Type] = 1;
-   type_whitelist_map[&PyStdPrinter_Type] = 1;
+//   type_whitelist_map[&PyReversed_Type] = 1;
+//   type_whitelist_map[&PyStdPrinter_Type] = 1;
 //   type_whitelist_map[&PyCode_Type] = 1;
    type_whitelist_map[&PyFrame_Type] = 1;
    type_whitelist_map[&PyCFunction_Type] = 1;
    type_whitelist_map[&PyMethod_Type] = 1;
    type_whitelist_map[&PyFunction_Type] = 1;
-   type_whitelist_map[&PyDictProxy_Type] = 1;
-   type_whitelist_map[&PyGen_Type] = 1;
-   type_whitelist_map[&PyGetSetDescr_Type] = 1;
-   type_whitelist_map[&PyWrapperDescr_Type] = 1;
-   type_whitelist_map[&_PyMethodWrapper_Type] = 1;
-   type_whitelist_map[&PyEllipsis_Type] = 1;
-   type_whitelist_map[&PyMemberDescr_Type] = 1;
-   type_whitelist_map[&_PyNamespace_Type] = 1;
-   type_whitelist_map[&PyCapsule_Type] = 1;
-   type_whitelist_map[&PyLongRangeIter_Type] = 1;
-   type_whitelist_map[&PyCell_Type] = 1;
-   type_whitelist_map[&PyInstanceMethod_Type] = 1;
-   type_whitelist_map[&PyClassMethodDescr_Type] = 1;
-   type_whitelist_map[&PyMethodDescr_Type] = 1;
-   type_whitelist_map[&PyCallIter_Type] = 1;
-   type_whitelist_map[&PySeqIter_Type] = 1;
-   type_whitelist_map[&PyCoro_Type] = 1;
-   type_whitelist_map[&_PyCoroWrapper_Type] = 1;
+//   type_whitelist_map[&PyDictProxy_Type] = 1;
+//   type_whitelist_map[&PyGen_Type] = 1;
+//   type_whitelist_map[&PyGetSetDescr_Type] = 1;
+//   type_whitelist_map[&PyWrapperDescr_Type] = 1;
+//   type_whitelist_map[&_PyMethodWrapper_Type] = 1;
+//   type_whitelist_map[&PyEllipsis_Type] = 1;
+//   type_whitelist_map[&PyMemberDescr_Type] = 1;
+//   type_whitelist_map[&_PyNamespace_Type] = 1;
+//   type_whitelist_map[&PyCapsule_Type] = 1;
+//   type_whitelist_map[&PyLongRangeIter_Type] = 1;
+//   type_whitelist_map[&PyCell_Type] = 1;
+//   type_whitelist_map[&PyInstanceMethod_Type] = 1;
+//   type_whitelist_map[&PyClassMethodDescr_Type] = 1;
+//   type_whitelist_map[&PyMethodDescr_Type] = 1;
+//   type_whitelist_map[&PyCallIter_Type] = 1;
+//   type_whitelist_map[&PySeqIter_Type] = 1;
+//   type_whitelist_map[&PyCoro_Type] = 1;
+//   type_whitelist_map[&_PyCoroWrapper_Type] = 1;
 
    type_whitelist_map[(PyTypeObject*)PyExc_Exception] = 1;
    type_whitelist_map[(PyTypeObject*)PyExc_TypeError] = 1;
@@ -297,10 +298,6 @@ int inspector::inspect_import_name(const char* name) {
       return 1;
    }
    return import_name_whitelist.find(name) != import_name_whitelist.end();
-}
-
-int inspector::whitelist_attr(const char* name) {
-   return 1;
 }
 
 bool compare_string(Py_UNICODE * wstr, Py_ssize_t size, string& str) {
@@ -416,11 +413,14 @@ int inspector::inspect_build_class(PyObject* cls) {
 }
 
 int inspector::is_class_in_current_account(PyObject* cls) {
+   return cy_is_class_in_current_account(cls);
+#if 0
    auto it = accounts_info_map.find(current_account);
    if (it != accounts_info_map.end()) {
       auto& info = it->second;
       return info->class_objects.find(cls) != info->class_objects.end();
    }
+#endif
    return 0;
 }
 

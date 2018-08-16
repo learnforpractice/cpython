@@ -56,7 +56,6 @@ public:
    int whitelist_import_name(const char* name);
    int inspect_import_name(const char* name);
 
-   int whitelist_attr(const char* name);
    int inspect_setattr(PyObject* v, PyObject* name);
 
    int inspect_getattr(PyObject* v, PyObject* name);
