@@ -577,7 +577,7 @@ tb_printinternal(PyTracebackObject *tb, PyObject *f, long limit)
     return err;
 }
 
-#define PyTraceBack_LIMIT 1000
+#define PyTraceBack_LIMIT 20
 
 int
 PyTraceBack_Print(PyObject *v, PyObject *f)

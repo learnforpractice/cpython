@@ -223,11 +223,13 @@ inspector::inspector() {
    type_whitelist_map[(PyTypeObject*)PyExc_OSError] = 1;
    type_whitelist_map[(PyTypeObject*)PyExc_AssertionError] = 1;
    type_whitelist_map[(PyTypeObject*)PyExc_ImportError] = 1;
+   type_whitelist_map[(PyTypeObject*)PyExc_OverflowError] = 1;
 
    type_whitelist_map[(PyTypeObject*)PyExc_NameError] = 1;
    type_whitelist_map[(PyTypeObject*)PyExc_IndexError] = 1;
+   type_whitelist_map[(PyTypeObject*)PyExc_BaseException] = 1;
 
-   type_whitelist_map[&PyFileIO_Type] = 1; //FIXME: dangerous type
+//   type_whitelist_map[&PyFileIO_Type] = 1; //FIXME: dangerous type
    type_whitelist_map[&PyBufferedReader_Type] = 1;
    type_whitelist_map[&PyTextIOWrapper_Type] = 1;
 
