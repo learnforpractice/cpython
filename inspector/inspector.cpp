@@ -1,7 +1,7 @@
 #include "inspector.hpp"
 #include <eosiolib_native/vm_api.h>
 #include <opcode.h>
-#include <internal/pystate.h>
+#include <pystate.h>
 
 using namespace std;
 

@@ -93,7 +93,7 @@ intern_string_constants(PyObject *tuple)
 }
 
 #ifdef PYTHON_SS
-#include "inspector.h"
+#include "inspector/inspector.h"
 #endif
 
 PyCodeObject *

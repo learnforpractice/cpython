@@ -30,6 +30,8 @@ add_custom_command(
     OUTPUT ${PYTHON_LIB}
     COMMAND OPENSSL_ROOT=${OPENSSL_ROOT};make ${BUILD_FLAGS}
     COMMAND make install
+    COMMAND LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install cython
+    COMMAND LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install ptvsd==3.0.0
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "making python3.7"
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
@@ -71,6 +73,13 @@ add_custom_command(
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/eos/cython/pydebug.pyx
 )
 
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/inspector/inspector.wrap.cpp
+    COMMAND ${PYTHON3} -m cython --cplus ${CMAKE_CURRENT_SOURCE_DIR}/inspector/inspector.pyx -o ${CMAKE_CURRENT_SOURCE_DIR}/inspector/inspector.wrap.cpp
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/inspector/inspector.pyx
+)
+
+
 #./configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist --without-threads
 
 
@@ -78,7 +87,8 @@ add_library( python3-ss
           STATIC
          Modules/_struct.c
 
-         inspector.cpp
+         inspector/inspector.cpp
+         inspector/inspector.wrap.cpp
 
          Modules/config.c
          Modules/_threadmodule.c
@@ -246,7 +256,7 @@ add_library( python3-ss
 
 set(PYTHON_FLAGS -DNDEBUG -DPYTHON_SS -DPy_BUILD_CORE -DPREFIX="" -DEXEC_PREFIX="" -DVERSION="3.7" -DVPATH="" -DPYTHONPATH="")
 
-target_compile_options(python3-ss PRIVATE ${PYTHON_FLAGS} -g -msoft-float -m64 -fwrapv -O3 -Wall -Wstrict-prototypes -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers )
+target_compile_options(python3-ss PRIVATE $<$<COMPILE_LANGUAGE:C>:${PYTHON_FLAGS} -g -msoft-float -m64 -fwrapv -O3 -Wall -Wstrict-prototypes -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers> )
 
 if (APPLE)
     target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES} intl softfloat)

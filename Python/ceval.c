@@ -23,7 +23,7 @@
 #include <ctype.h>
 
 #ifdef PYTHON_SS
-#include "inspector.h"
+#include "inspector/inspector.h"
 #endif
 
 #ifdef Py_DEBUG

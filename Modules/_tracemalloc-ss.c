@@ -1,4 +1,3 @@
-#include "../inspector.h"
 #include "Python.h"
 #include "hashtable.h"
 #include "frameobject.h"
@@ -8,6 +7,8 @@
 #include "clinic/_tracemalloc.c.h"
 
 #include "objimpl.h"
+
+#include "inspector/inspector.h"
 
 #define MAX_NFRAME 10
 

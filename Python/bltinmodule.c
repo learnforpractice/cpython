@@ -2866,7 +2866,7 @@ _PyBuiltin_Init(void)
 
 #ifdef PYTHON_SS
 
-#include "inspector.h"
+#include "inspector/inspector.h"
 
 PyObject* builtin_exec_(PyObject *co, PyObject *globals, PyObject *locals) {
    PyObject* ret;

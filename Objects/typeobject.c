@@ -907,7 +907,7 @@ type_repr(PyTypeObject *type)
     return rtn;
 }
 #ifdef PYTHON_SS
-   #include "inspector.h"
+   #include "inspector/inspector.h"
 #endif
 
 static PyObject *
