@@ -89,17 +89,6 @@ int filter_attr(PyObject* v, PyObject* name) {
     if (!PyUnicode_Check(name)) {
         return 0;
     }
-//    printf("tp->tp_name %s, PyLong_Type %p\n", tp->tp_name, &PyLong_Type);
-
-    cname = PyUnicode_AsUTF8AndSize(name,&size);
-    if (size >= 2 && cname) {
-       if (cname[0] == '_' && cname[1] == '_') {
-          if (strcmp(cname, "__init__") == 0) {
-             return 1;
-          }
-          return 0;
-       }
-    }
 
     if (tp->tp_getattro != NULL) {
        PyObject* o = (*tp->tp_getattro)(v, name);
@@ -321,13 +310,13 @@ int inspector::inspect_setattr(PyObject* v, PyObject* name) {
    }
 
    Py_ssize_t size;
-   Py_UNICODE * wstr = PyUnicode_AsUnicodeAndSize(name, &size);
-   if (!wstr) {
+   const char* _name = PyUnicode_AsUTF8AndSize(name, &size);
+   if (!_name) {
       return 0;
    }
 
-   if (size >= 2 && wstr[0] == '_' && wstr[1] == '_') {
-      printf("inspect_setattr failed\n");
+   if (size >= 2 && _name[0] == '_' && _name[1] == '_') {
+      printf("inspect_setattr attribute accessing should not start with '_'\n");
       return 0;
    }
 
@@ -340,21 +329,6 @@ int inspector::inspect_setattr(PyObject* v, PyObject* name) {
       return 1;
    }
    return 0;
-
-   string s("__init__");
-   if (compare_string(wstr, size, s)) {
-      return 1;
-   }
-
-
-   if (size >= 2 && wstr[0] == '_' && wstr[1] == '_') {
-      printf("inspect_setattr failed\n");
-      return 0;
-   } else {
-      return 1;
-   }
-
-   return 1;
 }
 
 int inspector::inspect_getattr(PyObject* v, PyObject* name) {
@@ -363,19 +337,18 @@ int inspector::inspect_getattr(PyObject* v, PyObject* name) {
    }
 
    Py_ssize_t size;
-   Py_UNICODE * wstr = PyUnicode_AsUnicodeAndSize(name, &size);
-   if (!wstr) {
+   const char *cname = PyUnicode_AsUTF8AndSize(name, &size);
+   if (!cname) {
       return 0;
    }
 
-   string s("__init__");
-   if (compare_string(wstr, size, s)) {
-      return 1;
-   }
-
-   if (size >= 2 && wstr[0] == '_' && wstr[1] == '_') {
-      printf("inspect_getattr failed\n");
-      return 0;
+   if (size >= 2) {
+      if (cname[0] == '_' && cname[1] == '_') {
+         if (strcmp(cname, "__init__") == 0) {
+            return 1;
+         }
+         return 0;
+      }
    }
 
    if (current_module == v) {
@@ -386,13 +359,14 @@ int inspector::inspect_getattr(PyObject* v, PyObject* name) {
    if (is_class_in_current_account(cls)) {
       return 1;
    }
-   return py_inspect_getattr(v, name);
+   return filter_attr(v, name);
 }
 
 int inspector::inspect_build_class(PyObject* cls) {
    if (!enabled) {
       return 1;
    }
+   return 1;
 
    PyFrameObject *f = PyThreadState_GET()->frame;
    if (f != NULL) {
@@ -416,14 +390,6 @@ int inspector::inspect_build_class(PyObject* cls) {
 
 int inspector::is_class_in_current_account(PyObject* cls) {
    return cy_is_class_in_current_account(cls);
-#if 0
-   auto it = accounts_info_map.find(current_account);
-   if (it != accounts_info_map.end()) {
-      auto& info = it->second;
-      return info->class_objects.find(cls) != info->class_objects.end();
-   }
-#endif
-   return 0;
 }
 
 int inspector::add_account_function(uint64_t account, PyObject* func) {
@@ -477,25 +443,6 @@ void inspector::memory_trace_stop() {
 }
 
 void inspector::memory_trace_alloc(void* ptr, size_t new_size) {
-#if 0
-   if (!current_account) {
-      return;
-   }
-
-   auto _account_info = accounts_info_map.find(current_account);
-   if (_account_info == accounts_info_map.end()) {
-      return;
-   }
-
-//   printf("++++++++++memory_trace_alloc %lld %p %d\n", current_account, ptr, new_size);
-   memory_info_map[ptr] = std::make_unique<account_memory_info>();
-
-   auto& _memory_info = memory_info_map[ptr];
-   _account_info->second->total_used_memory += new_size;
-   _memory_info->size = new_size;
-   _memory_info->info = _account_info->second;
-#endif
-
    if (!enabled) {
       return;
    }
@@ -506,32 +453,6 @@ void inspector::memory_trace_alloc(void* ptr, size_t new_size) {
 }
 
 void inspector::memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_size) {
-#if 0
-   if (!current_account) {
-      return;
-   }
-   auto _account_info = accounts_info_map.find(current_account);
-   if (_account_info == accounts_info_map.end()) {
-      return;
-   }
-
-   auto it = memory_info_map.find(old_ptr);
-   if (it == memory_info_map.end()) {
-      return;
-   }
-   it->second->info->total_used_memory -= it->second->size;
-   it->second->info->total_used_memory += new_size;
-
-   if (old_ptr == new_ptr) {
-      it->second->size = new_size;
-   } else {
-      memory_info_map.erase(it);
-      auto _memory_info = std::make_unique<account_memory_info>();
-      _memory_info->size = new_size;
-      _memory_info->info = _account_info->second;
-      memory_info_map[new_ptr] = std::move(_memory_info);
-   }
-#endif
    if (!enabled) {
       return;
    }
@@ -547,20 +468,6 @@ void inspector::memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_si
 }
 
 void inspector::memory_trace_free(void* ptr) {
-#if 0
-   if (!current_account) {
-      return;
-   }
-//   printf("++++++++++memory_trace_free %p\n", ptr);
-   auto it = memory_info_map.find(ptr);
-   if (it == memory_info_map.end()) {
-      return;
-   }
-   it->second->info->total_used_memory -= it->second->size;
-   printf("+++memory_trace_free: total_used_memory %lld %d %d\n", it->second->info->account, it->second->info->total_used_memory, it->second->size);
-   memory_info_map.erase(it);
-#endif
-
    if (!enabled) {
       return;
    }
@@ -574,22 +481,6 @@ void inspector::memory_trace_free(void* ptr) {
 }
 
 int inspector::inspect_memory() {
-#if 0
-   if (!current_account) {
-      return 1;
-   }
-
-   if (get_vm_api()->is_replay()) {
-      return 1;
-   }
-
-   auto _account_info = accounts_info_map.find(current_account);
-   if (_account_info == accounts_info_map.end()) {
-      return 1;
-   }
-//   printf("++++++_account_info->second->total_used_memory %lld %d \n", current_account, _account_info->second->total_used_memory);
-   return _account_info->second->total_used_memory <=500*1024;
-#endif
    if (!enabled) {
       return 1;
    }
