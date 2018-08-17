@@ -930,11 +930,20 @@ build_string(SubString *input, PyObject *args, PyObject *kwargs,
 /*********** main routine ***********************************************/
 /************************************************************************/
 
+#include "inspector/inspector.h"
+
 /* this is the main entry point */
 static PyObject *
 do_string_format(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     SubString input;
+
+#ifdef PYTHON_SS
+    if (is_inspector_enabled()) {
+       PyErr_SetString(PyExc_AttributeError,"'str' object has no attribute 'format'");
+       return NULL;
+    }
+#endif
 
     /* PEP 3101 says only 2 levels, so that
        "{0:{1}}".format('abc', 's')            # works

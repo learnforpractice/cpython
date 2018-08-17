@@ -607,6 +607,10 @@ void enable_injected_apis(int enabled) {
    inspector::get().enabled = enabled;
 }
 
+int is_inspector_enabled() {
+   return inspector::get().enabled;
+}
+
 void whitelist_function(PyObject* func) {
    inspector::get().whitelist_function(func);
 }

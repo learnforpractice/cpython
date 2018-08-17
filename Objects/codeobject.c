@@ -224,6 +224,123 @@ PyCode_New(int argcount, int kwonlyargcount,
 }
 
 PyCodeObject *
+PyCode_NewEx(int argcount, int kwonlyargcount,
+           int nlocals, int stacksize, int flags,
+           PyObject *code, PyObject *consts, PyObject *names,
+           PyObject *varnames, PyObject *freevars, PyObject *cellvars,
+           PyObject *filename, PyObject *name, int firstlineno,
+           PyObject *lnotab)
+{
+    PyCodeObject *co;
+    Py_ssize_t *cell2arg = NULL;
+    Py_ssize_t i, n_cellvars;
+
+    /* Check argument types */
+    if (argcount < 0 || kwonlyargcount < 0 || nlocals < 0 ||
+        code == NULL || !PyBytes_Check(code) ||
+        consts == NULL || !PyTuple_Check(consts) ||
+        names == NULL || !PyTuple_Check(names) ||
+        varnames == NULL || !PyTuple_Check(varnames) ||
+        freevars == NULL || !PyTuple_Check(freevars) ||
+        cellvars == NULL || !PyTuple_Check(cellvars) ||
+        name == NULL || !PyUnicode_Check(name) ||
+        filename == NULL || !PyUnicode_Check(filename) ||
+        lnotab == NULL || !PyBytes_Check(lnotab)) {
+        PyErr_BadInternalCall();
+        return NULL;
+    }
+
+    /* Ensure that the filename is a ready Unicode string */
+    if (PyUnicode_READY(filename) < 0)
+        return NULL;
+
+    intern_strings(names);
+    intern_strings(varnames);
+    intern_strings(freevars);
+    intern_strings(cellvars);
+    intern_string_constants(consts);
+
+    /* Check for any inner or outer closure references */
+    n_cellvars = PyTuple_GET_SIZE(cellvars);
+    if (!n_cellvars && !PyTuple_GET_SIZE(freevars)) {
+        flags |= CO_NOFREE;
+    } else {
+        flags &= ~CO_NOFREE;
+    }
+
+    /* Create mapping between cells and arguments if needed. */
+    if (n_cellvars) {
+        Py_ssize_t total_args = argcount + kwonlyargcount +
+            ((flags & CO_VARARGS) != 0) + ((flags & CO_VARKEYWORDS) != 0);
+        bool used_cell2arg = false;
+        cell2arg = PyMem_NEW(Py_ssize_t, n_cellvars);
+        if (cell2arg == NULL) {
+            PyErr_NoMemory();
+            return NULL;
+        }
+        /* Find cells which are also arguments. */
+        for (i = 0; i < n_cellvars; i++) {
+            Py_ssize_t j;
+            PyObject *cell = PyTuple_GET_ITEM(cellvars, i);
+            cell2arg[i] = CO_CELL_NOT_AN_ARG;
+            for (j = 0; j < total_args; j++) {
+                PyObject *arg = PyTuple_GET_ITEM(varnames, j);
+                int cmp = PyUnicode_Compare(cell, arg);
+                if (cmp == -1 && PyErr_Occurred()) {
+                    PyMem_FREE(cell2arg);
+                    return NULL;
+                }
+                if (cmp == 0) {
+                    cell2arg[i] = j;
+                    used_cell2arg = true;
+                    break;
+                }
+            }
+        }
+        if (!used_cell2arg) {
+            PyMem_FREE(cell2arg);
+            cell2arg = NULL;
+        }
+    }
+    co = PyObject_NEW(PyCodeObject, &PyCode_Type);
+    if (co == NULL) {
+        if (cell2arg)
+            PyMem_FREE(cell2arg);
+        return NULL;
+    }
+    co->co_argcount = argcount;
+    co->co_kwonlyargcount = kwonlyargcount;
+    co->co_nlocals = nlocals;
+    co->co_stacksize = stacksize;
+    co->co_flags = flags;
+    Py_INCREF(code);
+    co->co_code = code;
+    Py_INCREF(consts);
+    co->co_consts = consts;
+    Py_INCREF(names);
+    co->co_names = names;
+    Py_INCREF(varnames);
+    co->co_varnames = varnames;
+    Py_INCREF(freevars);
+    co->co_freevars = freevars;
+    Py_INCREF(cellvars);
+    co->co_cellvars = cellvars;
+    co->co_cell2arg = cell2arg;
+    Py_INCREF(filename);
+    co->co_filename = filename;
+    Py_INCREF(name);
+    co->co_name = name;
+    co->co_firstlineno = firstlineno;
+    Py_INCREF(lnotab);
+    co->co_lnotab = lnotab;
+    co->co_zombieframe = NULL;
+    co->co_weakreflist = NULL;
+    co->co_extra = NULL;
+
+    return co;
+}
+
+PyCodeObject *
 PyCode_NewEmpty(const char *filename, const char *funcname, int firstlineno)
 {
     static PyObject *emptystring = NULL;

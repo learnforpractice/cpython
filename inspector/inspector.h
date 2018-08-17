@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 void enable_injected_apis(int enabled);
+int is_inspector_enabled();
 
 void inspect_set_status(int n);
 
@@ -59,6 +60,21 @@ int check_time(void);
 
 int filter_attr(PyObject* v, PyObject* name);
 void set_current_account(uint64_t account);
+
+PyCodeObject *
+PyCode_NewEx(int argcount, int kwonlyargcount,
+           int nlocals, int stacksize, int flags,
+           PyObject *code, PyObject *consts, PyObject *names,
+           PyObject *varnames, PyObject *freevars, PyObject *cellvars,
+           PyObject *filename, PyObject *name, int firstlineno,
+           PyObject *lnotab);
+
+#ifdef __Pyx_PyCode_New
+#undef __Pyx_PyCode_New
+#endif
+
+#define __Pyx_PyCode_New(a, k, l, s, f, code, c, n, v, fv, cell, fn, name, fline, lnos)\
+        PyCode_NewEx(a, k, l, s, f, code, c, n, v, fv, cell, fn, name, fline, lnos)
 
 
 #ifdef __cplusplus
