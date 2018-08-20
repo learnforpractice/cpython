@@ -34,12 +34,16 @@ static int memory_run_out(void) {
 }
 
 static int exit_eval_frame_check(void) {
+   static uint64_t counter = 0;
    if (!inspector::get().enabled) {
       return 0;
    }
-   if (!check_time()) {
-      PyErr_Format(PyExc_RuntimeError, "time out!!!");
-      return 1;
+   counter += 1;
+   if (counter % 10 == 0) {
+      if (!check_time()) {
+         PyErr_Format(PyExc_RuntimeError, "time out!!!");
+         return 1;
+      }
    }
    if (memory_run_out()) {
       PyGC_Collect();
