@@ -41,7 +41,7 @@ static int exit_eval_frame_check(void) {
    counter += 1;
    if (counter % 10 == 0) {
       if (!check_time()) {
-         PyErr_Format(PyExc_RuntimeError, "time out!!!");
+         PyErr_SetString(PyExc_RuntimeError, "time out!!!");
          return 1;
       }
    }
@@ -217,6 +217,7 @@ inspector::inspector() {
    type_whitelist_map[(PyTypeObject*)PyExc_AssertionError] = 1;
    type_whitelist_map[(PyTypeObject*)PyExc_ImportError] = 1;
    type_whitelist_map[(PyTypeObject*)PyExc_OverflowError] = 1;
+   type_whitelist_map[(PyTypeObject*)PyExc_RuntimeError] = 1;
 
    type_whitelist_map[(PyTypeObject*)PyExc_NameError] = 1;
    type_whitelist_map[(PyTypeObject*)PyExc_IndexError] = 1;

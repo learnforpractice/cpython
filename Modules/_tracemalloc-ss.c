@@ -100,7 +100,7 @@ tracemalloc_alloc(int use_calloc, void *ctx, size_t nelem, size_t elsize)
     PyMemAllocatorEx *alloc = (PyMemAllocatorEx *)ctx;
     void *ptr;
 
-    if (elsize == 0 || nelem > SIZE_MAX / elsize) {
+    if (elsize == 0 || nelem*elsize > SIZE_MAX) {
        return NULL;
     }
 
@@ -122,6 +122,10 @@ tracemalloc_realloc(void *ctx, void *ptr, size_t new_size)
     PyMemAllocatorEx *alloc = (PyMemAllocatorEx *)ctx;
     void *ptr2;
 
+    if (new_size > SIZE_MAX) {
+       return NULL;
+    }
+
     ptr2 = alloc->realloc(alloc->ctx, ptr, new_size);
     if (ptr2 == NULL)
         return NULL;
@@ -132,7 +136,6 @@ tracemalloc_realloc(void *ctx, void *ptr, size_t new_size)
     else {
         /* new allocation */
         memory_trace_alloc(ptr, new_size);
-
     }
     return ptr2;
 }
