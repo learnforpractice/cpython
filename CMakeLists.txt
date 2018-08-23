@@ -23,7 +23,7 @@ add_custom_command(
     COMMAND bash configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist --with-openssl=${OPENSSL_ROOT}  --enable-shared
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "configure python3.7"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/configure ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h.in
+#    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/configure ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h.in
 )
 
 add_custom_command(
