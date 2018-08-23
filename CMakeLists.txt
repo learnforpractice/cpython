@@ -9,7 +9,7 @@ set(PYTHON_LIB_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/dist/lib/libpython3.7m${CMAK
 set(ENABLE_SHARED "")
 
 
-set(PYTHON3 "${CMAKE_SOURCE_DIR}/libraries/python/dist/bin/python3")
+set(PYTHON3 "${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3")
 set( ENV{OPENSSL_ROOT} "${OPENSSL_ROOT}" )
 
 if(NOT APPLE)
@@ -65,7 +65,7 @@ INSTALL( TARGETS
 
 
 
-set(PYTHON3 "LD_LIBRARY_PATH=${CMAKE_SOURCE_DIR}/libraries/python;${CMAKE_SOURCE_DIR}/libraries/python/dist/bin/python3")
+set(PYTHON3 "LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3")
  
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/eos/wrap/pydebug.wrap.cpp
