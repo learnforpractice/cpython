@@ -11,6 +11,9 @@
 
 #include <ctype.h>
 
+#ifdef PYTHON_SS
+#include <inspector/inspector.h>
+#endif
 
 /* The default encoding used by the platform file system APIs
    Can remain NULL for all platforms that don't have such a concept
