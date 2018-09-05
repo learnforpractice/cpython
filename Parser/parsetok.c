@@ -204,7 +204,12 @@ parsetok(struct tok_state *tok, grammar *g, int start, perrdetail *err_ret,
         size_t len;
         char *str;
         int col_offset;
-
+#ifdef PYTHON_SS
+        if (!check_time()) {
+           err_ret->error = E_INTR;
+           break;
+        }
+#endif
         type = PyTokenizer_Get(tok, &a, &b);
         if (type == ERRORTOKEN) {
             err_ret->error = tok->done;
