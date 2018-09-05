@@ -1483,96 +1483,30 @@ new_interpreter_ex(PyThreadState **tstate_p)
     /* initialize builtin exceptions */
     _PyExc_Init(bimod);
 
-    if (bimod != NULL && sysmod != NULL) {
-        PyObject *pstderr;
-
-        /* Set up a preliminary stderr printer until we have enough
-           infrastructure for the io module in place. */
-        pstderr = PyFile_NewStdPrinter(fileno(stderr));
-        if (pstderr == NULL) {
-            return _Py_INIT_ERR("can't set preliminary stderr");
-        }
-        _PySys_SetObjectId(&PyId_stderr, pstderr);
-        PySys_SetObject("__stderr__", pstderr);
-        Py_DECREF(pstderr);
-
-        PySys_SetObject("__stdout__", pstderr);
-        _PySys_SetObjectId(&PyId_stdout, pstderr);
-
-        *tstate_p = tstate;
-        return _Py_INIT_OK();
-
-
-        err = _PyImportHooks_Init();
-        if (_Py_INIT_FAILED(err)) {
-            return err;
-        }
-
-        err = initimport(interp, sysmod);
-        if (_Py_INIT_FAILED(err)) {
-            return err;
-        }
-
-        err = initexternalimport(interp);
-        if (_Py_INIT_FAILED(err)) {
-            return err;
-        }
-#if 1
-        err = initfsencoding(interp);
-        if (_Py_INIT_FAILED(err)) {
-            return err;
-        }
-#endif
-
-#if 1
-        {
-           PyObject *iomod;
-           if (!(iomod = PyImport_ImportModule("io"))) {
-               return err;
-           }
-           /* Set sys.stdout */
-           int fd = fileno(stdout);
-           const char *encoding = "utf-8";
-           const char *errors = "surrogateescape";
-   //        PyObject *std = create_stdio(iomod, fd, 1, "<stdout>", encoding, errors);
-           PyObject *std = create_stdio(iomod, fd, 1, "<stdout>", encoding, errors);
-           if (std == NULL)
-               return err;
-           PySys_SetObject("__stdout__", std);
-           _PySys_SetObjectId(&PyId_stdout, std);
-           Py_DECREF(std);
-        }
-#endif
-
-#if 1
-        *tstate_p = tstate;
-        return _Py_INIT_OK();
-#endif
-
-        err = init_sys_streams(interp);
-        if (_Py_INIT_FAILED(err)) {
-            return err;
-        }
-
-        err = add_main_module(interp);
-        if (_Py_INIT_FAILED(err)) {
-            return err;
-        }
-
-        if (!Py_NoSiteFlag) {
-            err = initsite();
-            if (_Py_INIT_FAILED(err)) {
-                return err;
-            }
-        }
+    if (bimod == NULL || sysmod == NULL) {
+       goto handle_error;
     }
+     PyObject *pstderr;
 
-    if (PyErr_Occurred()) {
-        goto handle_error;
-    }
+     /* Set up a preliminary stderr printer until we have enough
+        infrastructure for the io module in place. */
+     pstderr = PyFile_NewStdPrinter(fileno(stderr));
+     if (pstderr == NULL) {
+         return _Py_INIT_ERR("can't set preliminary stderr");
+     }
+     _PySys_SetObjectId(&PyId_stderr, pstderr);
+     PySys_SetObject("__stderr__", pstderr);
+     Py_DECREF(pstderr);
 
-    *tstate_p = tstate;
-    return _Py_INIT_OK();
+     PySys_SetObject("__stdout__", pstderr);
+     _PySys_SetObjectId(&PyId_stdout, pstderr);
+
+     if (PyErr_Occurred()) {
+         goto handle_error;
+     }
+
+     *tstate_p = tstate;
+     return _Py_INIT_OK();
 
 handle_error:
     /* Oops, it didn't work.  Undo it all. */
