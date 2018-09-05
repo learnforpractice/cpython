@@ -4806,7 +4806,7 @@ import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *leve
     {
        const char* utf8 = PyUnicode_AsUTF8(name);
        res = vm_cpython_load_module(utf8);
-       printf("load module %s %p \n", utf8, res);
+//       printf("load module %s %p \n", utf8, res);
        if (res != NULL) {
           Py_INCREF(res);
           return res;

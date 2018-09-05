@@ -594,6 +594,9 @@ _Py_SetLocaleFromEnv(int category)
  * safe to call without calling Py_Initialize first)
  */
 
+PyObject*
+_PySys2_InitModule();
+
 _PyInitError
 _Py_InitializeCore(const _PyCoreConfig *core_config)
 {
@@ -715,6 +718,8 @@ _Py_InitializeCore(const _PyCoreConfig *core_config)
     Py_INCREF(interp->sysdict);
     PyDict_SetItemString(interp->sysdict, "modules", modules);
     _PyImport_FixupBuiltin(sysmod, "sys", modules);
+
+    _PyImport_FixupBuiltin(_PySys2_InitModule(), "sys2", modules);
 
     /* Init Unicode implementation; relies on the codec registry */
     if (_PyUnicode_Init() < 0)
@@ -1462,15 +1467,37 @@ new_interpreter_ex(PyThreadState **tstate_p)
     }
     interp->modules = modules;
 
-    sysmod = _PyImport_FindBuiltin("sys", modules);
+#if 1
+//    sysmod = PyInit_sys2();//_PyImport_FindBuiltin("sys2", modules);
+//    sysmod = PyImport_ImportModule("sys2");
+    sysmod = _PyImport_FindBuiltin("sys2", modules);
+
     if (sysmod != NULL) {
+        int res;
+        PyObject* sysdict = PyModule_GetDict(sysmod);
         interp->sysdict = PyModule_GetDict(sysmod);
         if (interp->sysdict == NULL)
             goto handle_error;
         Py_INCREF(interp->sysdict);
         PyDict_SetItemString(interp->sysdict, "modules", modules);
         _PySys_EndInit(interp->sysdict, &interp->config);
+
+        PyObject *v = (PyDict_GetItemString(sysdict, "excepthook"));
+        if (v == ((void *)0)) {
+            goto handle_error;
+        }
+        res = PyDict_SetItemString(sysdict, "__excepthook__", v);
+        if (res < 0) {
+            goto handle_error;
+        }
     }
+#else
+     interp->sysdict = PyDict_New();
+     Py_INCREF(interp->sysdict);
+     PyDict_SetItemString(interp->sysdict, "modules", modules);
+     _PySys_EndInit(interp->sysdict, &interp->config);
+
+#endif
 
     bimod = _PyImport_FindBuiltin("builtins", modules);
     if (bimod != NULL) {

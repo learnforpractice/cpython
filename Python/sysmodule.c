@@ -1489,7 +1489,6 @@ sys_getandroidapilevel(PyObject *self)
 }
 #endif   /* ANDROID_API_LEVEL */
 
-
 static PyMethodDef sys_methods[] = {
     /* Might as well keep this in alphabetic order */
     {"breakpointhook",  (PyCFunction)sys_breakpointhook,
@@ -1581,6 +1580,11 @@ static PyMethodDef sys_methods[] = {
      getandroidapilevel_doc},
 #endif
     {NULL,              NULL}           /* sentinel */
+};
+
+static PyMethodDef sys_methods2[] = {
+      {"excepthook",      sys_excepthook, METH_VARARGS, excepthook_doc},
+      {NULL,              NULL}           /* sentinel */
 };
 
 static PyObject *
@@ -2231,6 +2235,23 @@ static struct PyModuleDef sysmodule = {
     NULL
 };
 
+static struct PyModuleDef sysmodule2 = {
+    PyModuleDef_HEAD_INIT,
+    "sys",
+    sys_doc,
+    -1, /* multiple "initialization" just copies the module dict. */
+    sys_methods2,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+
+PyObject* PyInit_sys2(void)
+{
+  return PyModuleDef_Init(&sysmodule2);
+}
+
 /* Updating the sys namespace, returning NULL pointer on error */
 #define SET_SYS_FROM_STRING_BORROW(key, value)             \
     do {                                                   \
@@ -2256,7 +2277,26 @@ static struct PyModuleDef sysmodule = {
         }                                                  \
     } while (0)
 
+PyObject*
+_PySys2_InitModule()
+{
+    static PyObject* sysmodule = NULL;
+    PyObject *sysdict, *version_info;
+    int res;
 
+    sysmodule = _PyModule_CreateInitialized(&sysmodule2, PYTHON_API_VERSION);
+    if (sysmodule == NULL) {
+        return NULL;
+    }
+    sysdict = PyModule_GetDict(sysmodule);
+
+    /* stdin/stdout/stderr are set in pylifecycle.c */
+
+    SET_SYS_FROM_STRING_BORROW("__excepthook__",
+                               PyDict_GetItemString(sysdict, "excepthook"));
+err_occurred:
+    return sysmodule;
+}
 _PyInitError
 _PySys_BeginInit(PyObject **sysmod)
 {
