@@ -2876,7 +2876,18 @@ PyObject* builtin_exec_(PyObject *co, PyObject *globals, PyObject *locals) {
    enable_filter_get_attr(1);
    enable_inspect_obj_creation(1);
 
+#if 1
    ret = builtin_exec_impl(NULL, co, globals, locals);
+#else
+   if (PyCode_GetNumFree((PyCodeObject *)co) > 0) {
+       PyErr_SetString(PyExc_TypeError,
+           "code object passed to exec() may not "
+           "contain free variables");
+       return NULL;
+   }
+   ret = PyEval_EvalCode(co, globals, locals);
+#endif
+
    enable_injected_apis(0);
    enable_create_code_object(1);
    enable_filter_set_attr(0);

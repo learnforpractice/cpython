@@ -1363,6 +1363,168 @@ err_return:
 }
 
 int
+PyImport_ImportFrozenModuleObjectEx(const struct _frozen *p)
+{
+    PyObject *name;
+    PyObject *co, *m, *d;
+    int ispackage;
+    int size;
+
+    name = PyUnicode_InternFromString(p->name);
+    if (name == NULL)
+        return -1;
+
+//    p = find_frozen(name);
+
+    if (p == NULL)
+        return 0;
+    if (p->code == NULL) {
+        PyErr_Format(PyExc_ImportError,
+                     "Excluded frozen object named %R",
+                     name);
+        return -1;
+    }
+    size = p->size;
+    ispackage = (size < 0);
+    if (ispackage)
+        size = -size;
+    co = PyMarshal_ReadObjectFromString((const char *)p->code, size);
+    if (co == NULL)
+        return -1;
+    if (!PyCode_Check(co)) {
+        PyErr_Format(PyExc_TypeError,
+                     "frozen object %R is not a code object",
+                     name);
+        goto err_return;
+    }
+    if (ispackage) {
+        /* Set __path__ to the empty list */
+        PyObject *l;
+        int err;
+        m = PyImport_AddModuleObject(name);
+        if (m == NULL)
+            goto err_return;
+        d = PyModule_GetDict(m);
+        l = PyList_New(0);
+        if (l == NULL) {
+            goto err_return;
+        }
+        err = PyDict_SetItemString(d, "__path__", l);
+        Py_DECREF(l);
+        if (err != 0)
+            goto err_return;
+    }
+    d = module_dict_for_exec(name);
+    if (d == NULL) {
+        goto err_return;
+    }
+    m = exec_code_in_module(name, d, co);
+    if (m == NULL)
+        goto err_return;
+    Py_DECREF(co);
+    Py_DECREF(m);
+    return 1;
+err_return:
+    Py_DECREF(co);
+    return -1;
+}
+
+PyObject *
+PyImport_ImportFrozenModuleObjectExEx(const char *_name, const char *_code, int _size)
+{
+    PyObject *co, *m, *d, *name;
+
+    if (_name == NULL || _code == NULL || _size == 0) {
+       return NULL;
+    }
+
+    name = PyUnicode_InternFromString(_name);
+    if (name == NULL) {
+       return NULL;
+    }
+
+    if (_code == NULL) {
+        PyErr_Format(PyExc_ImportError,
+                     "Excluded frozen object named %R",
+                     name);
+        return NULL;
+    }
+
+    co = PyMarshal_ReadObjectFromString((const char *)_code, _size);
+    if (co == NULL) {
+       return NULL;
+    }
+
+    if (!PyCode_Check(co)) {
+        PyErr_Format(PyExc_TypeError,
+                     "frozen object %R is not a code object",
+                     name);
+        goto err_return;
+    }
+
+    m = PyModule_NewObject(name);
+    if (m == NULL) {
+       goto err_return;
+    }
+
+    d = PyModule_GetDict(m);
+    if (d == NULL) {
+        goto err_return;
+    }
+
+    PyObject *v= PyEval_EvalCode(co, d, d);
+    if (v == NULL) {
+       goto err_return;
+    }
+
+    Py_DECREF(co);
+    return m;
+err_return:
+    Py_DECREF(co);
+    return NULL;
+}
+
+
+PyObject *
+PyImport_LoadCodeObject(const char *_name, const char *_code, int _size)
+{
+    PyObject *co, *name;
+
+    if (_name == NULL || _code == NULL || _size == 0) {
+       return NULL;
+    }
+
+    name = PyUnicode_InternFromString(_name);
+    if (name == NULL) {
+       return NULL;
+    }
+
+    if (_code == NULL) {
+        PyErr_Format(PyExc_ImportError,
+                     "Excluded frozen object named %R",
+                     name);
+        return NULL;
+    }
+
+    co = PyMarshal_ReadObjectFromString((const char *)_code, _size);
+    if (co == NULL) {
+       return NULL;
+    }
+
+    if (!PyCode_Check(co)) {
+        PyErr_Format(PyExc_TypeError,
+                     "frozen object %R is not a code object",
+                     name);
+        goto err_return;
+    }
+
+    return co;
+err_return:
+    Py_DECREF(co);
+    return NULL;
+}
+
+int
 PyImport_ImportFrozenModule(const char *name)
 {
     PyObject *nameobj;

@@ -2363,3 +2363,8 @@ PyInit__struct(void)
 
     return m;
 }
+
+PyObject* PyInit_struct2(void)
+{
+  return PyModuleDef_Init(&_structmodule);
+}
