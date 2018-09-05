@@ -10,13 +10,14 @@
 
 #include <Python.h>
 #include <frameobject.h>
+#include <eosiolib_native/vm_api.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void enable_injected_apis(int enabled);
-int is_inspector_enabled();
+int is_inspector_enabled(void);
 
 void inspect_set_status(int n);
 
@@ -68,6 +69,9 @@ PyCode_NewEx(int argcount, int kwonlyargcount,
            PyObject *varnames, PyObject *freevars, PyObject *cellvars,
            PyObject *filename, PyObject *name, int firstlineno,
            PyObject *lnotab);
+
+int is_debug_mode(void);
+void debug_print(const char* str, int len);
 
 #ifdef __Pyx_PyCode_New
 #undef __Pyx_PyCode_New

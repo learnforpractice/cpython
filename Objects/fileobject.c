@@ -23,6 +23,11 @@
 extern "C" {
 #endif
 
+#ifdef PYTHON_SS
+#include <inspector/inspector.h>
+#include <internal/pystate.h>
+#endif
+
 /* External C interface */
 
 PyObject *
@@ -358,6 +363,12 @@ stdprinter_write(PyStdPrinter_Object *self, PyObject *args)
     Py_ssize_t n;
     int err;
 
+#ifdef PYTHON_SS
+    if (!is_debug_mode()) {
+        Py_RETURN_NONE;
+    }
+#endif
+
     if (self->fd < 0) {
         /* fd might be invalid on Windows
          * I can't raise an exception here. It may lead to an
@@ -380,7 +391,14 @@ stdprinter_write(PyStdPrinter_Object *self, PyObject *args)
         n = PyBytes_GET_SIZE(bytes);
     }
 
+#ifdef PYTHON_SS
+{
+   debug_print(str, n);
+}
+#else
     n = _Py_write(self->fd, str, n);
+#endif
+
     /* save errno, it can be modified indirectly by Py_XDECREF() */
     err = errno;
 
