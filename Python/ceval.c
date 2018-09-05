@@ -4789,6 +4789,8 @@ cmp_outcome(int op, PyObject *v, PyObject *w)
     return v;
 }
 
+PyObject* vm_cpython_load_module(const char* module_name);
+
 static PyObject *
 import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *level)
 {
@@ -4800,6 +4802,15 @@ import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *leve
     if (!inspect_import_name(name)) {
        PyErr_Format(PyExc_ImportError, "cannot import name %R", name);
        return NULL;
+    }
+    {
+       const char* utf8 = PyUnicode_AsUTF8(name);
+       res = vm_cpython_load_module(utf8);
+       printf("load module %s %p \n", utf8, res);
+       if (res != NULL) {
+          Py_INCREF(res);
+          return res;
+       }
     }
 #endif
 
