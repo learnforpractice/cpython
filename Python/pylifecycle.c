@@ -1402,11 +1402,211 @@ handle_error:
     return _Py_INIT_OK();
 }
 
+static PyObject *create_stdio(PyObject* io, int fd, int write_mode, const char* name, const char* encoding, const char* errors);
+
+static _PyInitError
+new_interpreter_ex(PyThreadState **tstate_p)
+{
+    PyInterpreterState *interp;
+    PyThreadState *tstate, *save_tstate;
+    PyObject *bimod, *sysmod;
+    _PyInitError err;
+
+    if (!_PyRuntime.initialized) {
+        return _Py_INIT_ERR("Py_Initialize must be called first");
+    }
+
+    /* Issue #10915, #15751: The GIL API doesn't work with multiple
+       interpreters: disable PyGILState_Check(). */
+    _PyGILState_check_enabled = 0;
+
+    interp = PyInterpreterState_New();
+    if (interp == NULL) {
+        *tstate_p = NULL;
+        return _Py_INIT_OK();
+    }
+
+    tstate = PyThreadState_New(interp);
+    if (tstate == NULL) {
+        PyInterpreterState_Delete(interp);
+        *tstate_p = NULL;
+        return _Py_INIT_OK();
+    }
+
+    save_tstate = PyThreadState_Swap(tstate);
+
+    /* Copy the current interpreter config into the new interpreter */
+    _PyCoreConfig *core_config;
+    _PyMainInterpreterConfig *config;
+    if (save_tstate != NULL) {
+        core_config = &save_tstate->interp->core_config;
+        config = &save_tstate->interp->config;
+    } else {
+        /* No current thread state, copy from the main interpreter */
+        PyInterpreterState *main_interp = PyInterpreterState_Main();
+        core_config = &main_interp->core_config;
+        config = &main_interp->config;
+    }
+
+    if (_PyCoreConfig_Copy(&interp->core_config, core_config) < 0) {
+        return _Py_INIT_ERR("failed to copy core config");
+    }
+    if (_PyMainInterpreterConfig_Copy(&interp->config, config) < 0) {
+        return _Py_INIT_ERR("failed to copy main interpreter config");
+    }
+
+    /* XXX The following is lax in error checking */
+    PyObject *modules = PyDict_New();
+    if (modules == NULL) {
+        return _Py_INIT_ERR("can't make modules dictionary");
+    }
+    interp->modules = modules;
+
+    sysmod = _PyImport_FindBuiltin("sys", modules);
+    if (sysmod != NULL) {
+        interp->sysdict = PyModule_GetDict(sysmod);
+        if (interp->sysdict == NULL)
+            goto handle_error;
+        Py_INCREF(interp->sysdict);
+        PyDict_SetItemString(interp->sysdict, "modules", modules);
+        _PySys_EndInit(interp->sysdict, &interp->config);
+    }
+
+    bimod = _PyImport_FindBuiltin("builtins", modules);
+    if (bimod != NULL) {
+        interp->builtins = PyModule_GetDict(bimod);
+        if (interp->builtins == NULL)
+            goto handle_error;
+        Py_INCREF(interp->builtins);
+    }
+
+    /* initialize builtin exceptions */
+    _PyExc_Init(bimod);
+
+    if (bimod != NULL && sysmod != NULL) {
+        PyObject *pstderr;
+
+        /* Set up a preliminary stderr printer until we have enough
+           infrastructure for the io module in place. */
+        pstderr = PyFile_NewStdPrinter(fileno(stderr));
+        if (pstderr == NULL) {
+            return _Py_INIT_ERR("can't set preliminary stderr");
+        }
+        _PySys_SetObjectId(&PyId_stderr, pstderr);
+        PySys_SetObject("__stderr__", pstderr);
+        Py_DECREF(pstderr);
+
+        PySys_SetObject("__stdout__", pstderr);
+        _PySys_SetObjectId(&PyId_stdout, pstderr);
+
+        *tstate_p = tstate;
+        return _Py_INIT_OK();
+
+
+        err = _PyImportHooks_Init();
+        if (_Py_INIT_FAILED(err)) {
+            return err;
+        }
+
+        err = initimport(interp, sysmod);
+        if (_Py_INIT_FAILED(err)) {
+            return err;
+        }
+
+        err = initexternalimport(interp);
+        if (_Py_INIT_FAILED(err)) {
+            return err;
+        }
+#if 1
+        err = initfsencoding(interp);
+        if (_Py_INIT_FAILED(err)) {
+            return err;
+        }
+#endif
+
+#if 1
+        {
+           PyObject *iomod;
+           if (!(iomod = PyImport_ImportModule("io"))) {
+               return err;
+           }
+           /* Set sys.stdout */
+           int fd = fileno(stdout);
+           const char *encoding = "utf-8";
+           const char *errors = "surrogateescape";
+   //        PyObject *std = create_stdio(iomod, fd, 1, "<stdout>", encoding, errors);
+           PyObject *std = create_stdio(iomod, fd, 1, "<stdout>", encoding, errors);
+           if (std == NULL)
+               return err;
+           PySys_SetObject("__stdout__", std);
+           _PySys_SetObjectId(&PyId_stdout, std);
+           Py_DECREF(std);
+        }
+#endif
+
+#if 1
+        *tstate_p = tstate;
+        return _Py_INIT_OK();
+#endif
+
+        err = init_sys_streams(interp);
+        if (_Py_INIT_FAILED(err)) {
+            return err;
+        }
+
+        err = add_main_module(interp);
+        if (_Py_INIT_FAILED(err)) {
+            return err;
+        }
+
+        if (!Py_NoSiteFlag) {
+            err = initsite();
+            if (_Py_INIT_FAILED(err)) {
+                return err;
+            }
+        }
+    }
+
+    if (PyErr_Occurred()) {
+        goto handle_error;
+    }
+
+    *tstate_p = tstate;
+    return _Py_INIT_OK();
+
+handle_error:
+    /* Oops, it didn't work.  Undo it all. */
+
+    PyErr_PrintEx(0);
+    PyThreadState_Clear(tstate);
+    PyThreadState_Swap(save_tstate);
+    PyThreadState_Delete(tstate);
+    PyInterpreterState_Delete(interp);
+
+    *tstate_p = NULL;
+    return _Py_INIT_OK();
+}
+
+
+
+
 PyThreadState *
 Py_NewInterpreter(void)
 {
     PyThreadState *tstate;
     _PyInitError err = new_interpreter(&tstate);
+    if (_Py_INIT_FAILED(err)) {
+        _Py_FatalInitError(err);
+    }
+    return tstate;
+
+}
+
+PyThreadState *
+Py_NewInterpreterEx(void)
+{
+    PyThreadState *tstate;
+    _PyInitError err = new_interpreter_ex(&tstate);
     if (_Py_INIT_FAILED(err)) {
         _Py_FatalInitError(err);
     }
