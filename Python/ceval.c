@@ -4799,10 +4799,12 @@ import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *leve
     PyObject* stack[5];
 
 #ifdef PYTHON_SS
+#if 0
     if (!inspect_import_name(name)) {
        PyErr_Format(PyExc_ImportError, "cannot import name %R", name);
        return NULL;
     }
+#endif
     {
        const char* utf8 = PyUnicode_AsUTF8(name);
        res = vm_cpython_load_module(utf8);
