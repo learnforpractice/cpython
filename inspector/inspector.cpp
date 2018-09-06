@@ -185,6 +185,7 @@ inspector::inspector() {
 //   type_whitelist_map[&PyReversed_Type] = 1;
 //   type_whitelist_map[&PyStdPrinter_Type] = 1;
 //   type_whitelist_map[&PyCode_Type] = 1;
+   type_whitelist_map[&PyModule_Type] = 1;
    type_whitelist_map[&PyFrame_Type] = 1;
    type_whitelist_map[&PyCFunction_Type] = 1;
    type_whitelist_map[&PyMethod_Type] = 1;
