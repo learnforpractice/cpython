@@ -4608,7 +4608,7 @@ call_function(PyObject ***pp_stack, Py_ssize_t oparg, PyObject *kwnames)
        presumed to be the most frequent callable object.
     */
     if (PyCFunction_Check(func)) {
-#ifdef PYTHON_SS
+#if 0 //def PYTHON_SS
        if (!inspect_function(func)) {
           PyErr_Format(PyExc_RuntimeError, "function %R has been black out!", func);
           return NULL;
@@ -4812,6 +4812,10 @@ import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *leve
        if (res != NULL) {
           Py_INCREF(res);
           return res;
+       }
+       if (inspector_enabled()) {
+          PyErr_Format(PyExc_ImportError, "cannot import name %R", name);
+          return NULL;
        }
     }
 #endif

@@ -630,6 +630,10 @@ void enable_inspect_obj_creation(int enable) {
    }
 }
 
+int inspector_enabled() {
+   return inspector::get().enabled;
+}
+
 void set_current_account(uint64_t account) {
    inspector::get().set_current_account(account);
 }

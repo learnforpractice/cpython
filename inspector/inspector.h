@@ -73,6 +73,9 @@ PyCode_NewEx(int argcount, int kwonlyargcount,
 int is_debug_mode(void);
 void debug_print(const char* str, int len);
 
+int inspector_enabled(void);
+
+
 #ifdef __Pyx_PyCode_New
 #undef __Pyx_PyCode_New
 #endif
