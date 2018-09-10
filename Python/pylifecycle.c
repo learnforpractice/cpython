@@ -594,8 +594,8 @@ _Py_SetLocaleFromEnv(int category)
  * safe to call without calling Py_Initialize first)
  */
 
-PyObject*
-_PySys2_InitModule();
+PyObject* _PySys2_InitModule();
+PyObject* _PyBuiltin_Init2(void);
 
 _PyInitError
 _Py_InitializeCore(const _PyCoreConfig *core_config)
@@ -727,6 +727,11 @@ _Py_InitializeCore(const _PyCoreConfig *core_config)
 
     if (_PyStructSequence_Init() < 0)
         return _Py_INIT_ERR("can't initialize structseq");
+
+    bimod = _PyBuiltin_Init2();
+    if (bimod == NULL)
+        return _Py_INIT_ERR("can't initialize builtins2 modules");
+    _PyImport_FixupBuiltin(bimod, "builtins2", modules);
 
     bimod = _PyBuiltin_Init();
     if (bimod == NULL)
@@ -1499,7 +1504,7 @@ new_interpreter_ex(PyThreadState **tstate_p)
 
 #endif
 
-    bimod = _PyImport_FindBuiltin("builtins", modules);
+    bimod = _PyImport_FindBuiltin("builtins2", modules);
     if (bimod != NULL) {
         interp->builtins = PyModule_GetDict(bimod);
         if (interp->builtins == NULL)

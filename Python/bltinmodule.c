@@ -2867,6 +2867,143 @@ _PyBuiltin_Init(void)
 #undef SETBUILTIN
 }
 
+
+
+
+static PyMethodDef builtin_methods2[] = {
+    {"__build_class__", (PyCFunction)builtin___build_class__,
+     METH_FASTCALL | METH_KEYWORDS, build_class_doc},
+    {"__import__",      (PyCFunction)builtin___import__, METH_VARARGS | METH_KEYWORDS, import_doc},
+    BUILTIN_ABS_METHODDEF
+    BUILTIN_ALL_METHODDEF
+    BUILTIN_ANY_METHODDEF
+    BUILTIN_ASCII_METHODDEF
+    BUILTIN_BIN_METHODDEF
+//    {"breakpoint",      (PyCFunction)builtin_breakpoint, METH_FASTCALL | METH_KEYWORDS, breakpoint_doc},
+    BUILTIN_CALLABLE_METHODDEF
+    BUILTIN_CHR_METHODDEF
+//    BUILTIN_COMPILE_METHODDEF
+//    BUILTIN_DELATTR_METHODDEF
+//    {"dir",             builtin_dir,        METH_VARARGS, dir_doc},
+    BUILTIN_DIVMOD_METHODDEF
+//    BUILTIN_EVAL_METHODDEF
+//    BUILTIN_EXEC_METHODDEF
+//    BUILTIN_FORMAT_METHODDEF
+//    {"getattr",         (PyCFunction)builtin_getattr, METH_FASTCALL, getattr_doc},
+//    BUILTIN_GLOBALS_METHODDEF
+//    BUILTIN_HASATTR_METHODDEF
+    BUILTIN_HASH_METHODDEF
+    BUILTIN_HEX_METHODDEF
+    BUILTIN_ID_METHODDEF
+//    BUILTIN_INPUT_METHODDEF
+    BUILTIN_ISINSTANCE_METHODDEF
+//    BUILTIN_ISSUBCLASS_METHODDEF
+//    {"iter",            builtin_iter,       METH_VARARGS, iter_doc},
+    BUILTIN_LEN_METHODDEF
+//    BUILTIN_LOCALS_METHODDEF
+    {"max",             (PyCFunction)builtin_max,        METH_VARARGS | METH_KEYWORDS, max_doc},
+    {"min",             (PyCFunction)builtin_min,        METH_VARARGS | METH_KEYWORDS, min_doc},
+//    {"next",            (PyCFunction)builtin_next,       METH_FASTCALL, next_doc},
+    BUILTIN_OCT_METHODDEF
+    BUILTIN_ORD_METHODDEF
+    BUILTIN_POW_METHODDEF
+    {"print",           (PyCFunction)builtin_print,      METH_FASTCALL | METH_KEYWORDS, print_doc},
+//    BUILTIN_REPR_METHODDEF
+//    BUILTIN_ROUND_METHODDEF
+//    BUILTIN_SETATTR_METHODDEF
+//    BUILTIN_SORTED_METHODDEF
+//    BUILTIN_SUM_METHODDEF
+//    {"vars",            builtin_vars,       METH_VARARGS, vars_doc},
+    {NULL,              NULL},
+};
+
+static struct PyModuleDef builtinsmodule2 = {
+    PyModuleDef_HEAD_INIT,
+    "builtins2",
+    builtin_doc,
+    -1, /* multiple "initialization" just copies the module dict. */
+    builtin_methods2,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+
+PyObject *
+_PyBuiltin_Init2(void)
+{
+    PyObject *mod, *dict, *debug;
+
+    if (PyType_Ready(&PyFilter_Type) < 0 ||
+        PyType_Ready(&PyMap_Type) < 0 ||
+        PyType_Ready(&PyZip_Type) < 0)
+        return NULL;
+
+    mod = _PyModule_CreateInitialized(&builtinsmodule2, PYTHON_API_VERSION);
+    if (mod == NULL)
+        return NULL;
+    dict = PyModule_GetDict(mod);
+
+#ifdef Py_TRACE_REFS
+    /* "builtins" exposes a number of statically allocated objects
+     * that, before this code was added in 2.3, never showed up in
+     * the list of "all objects" maintained by Py_TRACE_REFS.  As a
+     * result, programs leaking references to None and False (etc)
+     * couldn't be diagnosed by examining sys.getobjects(0).
+     */
+#define ADD_TO_ALL(OBJECT) _Py_AddToAllObjects((PyObject *)(OBJECT), 0)
+#else
+#define ADD_TO_ALL(OBJECT) (void)0
+#endif
+
+#define SETBUILTIN(NAME, OBJECT) \
+    if (PyDict_SetItemString(dict, NAME, (PyObject *)OBJECT) < 0)       \
+        return NULL;                                                    \
+    ADD_TO_ALL(OBJECT)
+
+    SETBUILTIN("None",                  Py_None);
+    SETBUILTIN("Ellipsis",              Py_Ellipsis);
+    SETBUILTIN("NotImplemented",        Py_NotImplemented);
+    SETBUILTIN("False",                 Py_False);
+    SETBUILTIN("True",                  Py_True);
+    SETBUILTIN("bool",                  &PyBool_Type);
+//    SETBUILTIN("memoryview",        &PyMemoryView_Type);
+    SETBUILTIN("bytearray",             &PyByteArray_Type);
+    SETBUILTIN("bytes",                 &PyBytes_Type);
+    SETBUILTIN("classmethod",           &PyClassMethod_Type);
+//    SETBUILTIN("complex",               &PyComplex_Type);
+    SETBUILTIN("dict",                  &PyDict_Type);
+//    SETBUILTIN("enumerate",             &PyEnum_Type);
+//    SETBUILTIN("filter",                &PyFilter_Type);
+    SETBUILTIN("float",                 &PyFloat_Type);
+    SETBUILTIN("frozenset",             &PyFrozenSet_Type);
+    SETBUILTIN("property",              &PyProperty_Type);
+    SETBUILTIN("int",                   &PyLong_Type);
+    SETBUILTIN("list",                  &PyList_Type);
+    SETBUILTIN("map",                   &PyMap_Type);
+    SETBUILTIN("object",                &PyBaseObject_Type);
+    SETBUILTIN("range",                 &PyRange_Type);
+    SETBUILTIN("reversed",              &PyReversed_Type);
+    SETBUILTIN("set",                   &PySet_Type);
+    SETBUILTIN("slice",                 &PySlice_Type);
+    SETBUILTIN("staticmethod",          &PyStaticMethod_Type);
+    SETBUILTIN("str",                   &PyUnicode_Type);
+    SETBUILTIN("super",                 &PySuper_Type);
+    SETBUILTIN("tuple",                 &PyTuple_Type);
+    SETBUILTIN("type",                  &PyType_Type);
+    SETBUILTIN("zip",                   &PyZip_Type);
+    debug = PyBool_FromLong(Py_OptimizeFlag == 0);
+    if (PyDict_SetItemString(dict, "__debug__", debug) < 0) {
+        Py_DECREF(debug);
+        return NULL;
+    }
+    Py_DECREF(debug);
+
+    return mod;
+#undef ADD_TO_ALL
+#undef SETBUILTIN
+}
+
 #ifdef PYTHON_SS
 
 #include "inspector/inspector.h"
