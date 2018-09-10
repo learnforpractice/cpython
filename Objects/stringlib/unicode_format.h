@@ -930,7 +930,9 @@ build_string(SubString *input, PyObject *args, PyObject *kwargs,
 /*********** main routine ***********************************************/
 /************************************************************************/
 
+#ifdef PYTHON_SS
 #include "inspector/inspector.h"
+#endif
 
 /* this is the main entry point */
 static PyObject *
