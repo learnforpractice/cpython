@@ -2884,7 +2884,7 @@ static PyMethodDef builtin_methods2[] = {
     BUILTIN_CHR_METHODDEF
 //    BUILTIN_COMPILE_METHODDEF
 //    BUILTIN_DELATTR_METHODDEF
-//    {"dir",             builtin_dir,        METH_VARARGS, dir_doc},
+    {"dir",             builtin_dir,        METH_VARARGS, dir_doc},
     BUILTIN_DIVMOD_METHODDEF
 //    BUILTIN_EVAL_METHODDEF
 //    BUILTIN_EXEC_METHODDEF
