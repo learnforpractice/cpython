@@ -1875,10 +1875,12 @@ PyImport_ImportModuleLevelObject(PyObject *name, PyObject *globals,
         abs_name = name;
         Py_INCREF(abs_name);
     }
+#ifdef PYTHON_SS
     {
        const char* name = PyUnicode_AsUTF8(abs_name);
        printf("%s\n", name);
     }
+#endif
     mod = PyImport_GetModule(abs_name);
     if (mod != NULL && mod != Py_None) {
         _Py_IDENTIFIER(__spec__);
