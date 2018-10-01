@@ -364,7 +364,7 @@ stdprinter_write(PyStdPrinter_Object *self, PyObject *args)
     int err;
 
 #ifdef PYTHON_SS
-    if (!get_vm_api()->is_debug_mode()) {
+    if (!get_vm_api()->is_contracts_console_enabled()) {
         Py_RETURN_NONE;
     }
 #endif

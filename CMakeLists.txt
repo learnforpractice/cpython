@@ -15,9 +15,15 @@ if(NOT APPLE)
     set( ENV{LD_LIBRARY_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/dist/lib" )
 endif(NOT APPLE)
 
+if (APPLE)
+set(PRE_CONFIG echo)
+else()
+set(PRE_CONFIG python pre_config.py "${OPENSSL_ROOT}")
+endif(APPLE)
+
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/pyconfig.h
-    COMMAND python pre_config.py "${OPENSSL_ROOT}"
+    COMMAND ${PRE_CONFIG}
     COMMAND bash configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/dist CFLAGS="-D_POSIX_THREADS" --with-openssl=${OPENSSL_ROOT}  --enable-shared
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "configure python3.7"
