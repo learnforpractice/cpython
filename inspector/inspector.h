@@ -49,7 +49,7 @@ int is_current_code_object_in_current_account(void);
 
 void memory_trace_start(void);
 void memory_trace_stop(void);
-void memory_trace_alloc(void* ptr, size_t size);
+int memory_trace_alloc(void* ptr, size_t size);
 void memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_size);
 void memory_trace_free(void* ptr);
 

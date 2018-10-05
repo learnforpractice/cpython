@@ -94,6 +94,8 @@ raw_free(void *ptr)
 #undef SIZE_MAX
 #define SIZE_MAX (10*1024*1024)
 
+#define ENABLE_TRACE (1)
+
 static void*
 tracemalloc_alloc(int use_calloc, void *ctx, size_t nelem, size_t elsize)
 {
@@ -111,7 +113,12 @@ tracemalloc_alloc(int use_calloc, void *ctx, size_t nelem, size_t elsize)
     if (ptr == NULL)
         return NULL;
 
-    memory_trace_alloc(ptr, nelem * elsize);
+#if ENABLE_TRACE
+    if (!memory_trace_alloc(ptr, nelem * elsize)) {
+       alloc->free(alloc->ctx, ptr);
+       return NULL;
+    }
+#endif
     return ptr;
 }
 
@@ -131,11 +138,22 @@ tracemalloc_realloc(void *ctx, void *ptr, size_t new_size)
         return NULL;
 
     if (ptr != NULL) {
-       memory_trace_realloc(ptr, ptr2, new_size);
+#if ENABLE_TRACE
+       memory_trace_free(ptr);
+       if (!memory_trace_alloc(ptr2, new_size)) {
+          alloc->free(alloc->ctx, ptr);
+          return NULL;
+       }
+#endif
     }
     else {
         /* new allocation */
-        memory_trace_alloc(ptr, new_size);
+#if ENABLE_TRACE
+       if (!memory_trace_alloc(ptr, new_size)) {
+           alloc->free(alloc->ctx, ptr);
+           return NULL;
+        }
+#endif
     }
     return ptr2;
 }
@@ -361,9 +379,11 @@ tracemalloc_start(int max_nframe)
     alloc.realloc = tracemalloc_realloc_gil;
     alloc.free = tracemalloc_free;
 
+#if 0
     alloc.ctx = &allocators.mem;
     PyMem_GetAllocator(PYMEM_DOMAIN_MEM, &allocators.mem);
     PyMem_SetAllocator(PYMEM_DOMAIN_MEM, &alloc);
+#endif
 
     alloc.ctx = &allocators.obj;
     PyMem_GetAllocator(PYMEM_DOMAIN_OBJ, &allocators.obj);
@@ -384,9 +404,9 @@ tracemalloc_stop(void)
     tracemalloc_config.tracing = 0;
 
     /* unregister the hook on memory allocators */
-    PyMem_SetAllocator(PYMEM_DOMAIN_RAW, &allocators.raw);
+//    PyMem_SetAllocator(PYMEM_DOMAIN_RAW, &allocators.raw);
 
-    PyMem_SetAllocator(PYMEM_DOMAIN_MEM, &allocators.mem);
+//    PyMem_SetAllocator(PYMEM_DOMAIN_MEM, &allocators.mem);
     PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, &allocators.obj);
     memory_trace_stop();
 }

@@ -24,6 +24,7 @@ static int noticed = 0;
 static int memory_run_out(void) {
    if (!inspect_memory()) {
       if (!noticed) {
+         PyGC_Collect();
          noticed = 1;
          return 1;
       }
@@ -48,7 +49,7 @@ static int exit_eval_frame_check(void) {
    if (memory_run_out()) {
       PyGC_Collect();
       memory_trace_stop();
-      printf("++++++++++memory out! exit_eval_frame\n");
+      vmelog("++++++++++memory out! exit_eval_frame\n");
       PyErr_Format(PyExc_MemoryError, "memory run out!!!");
       return 1;
    }
@@ -322,7 +323,7 @@ int inspector::inspect_setattr(PyObject* v, PyObject* name) {
    }
 
    if (size >= 2 && _name[0] == '_' && _name[1] == '_') {
-      printf("inspect_setattr attribute accessing should not start with '_'\n");
+      vmelog("inspect_setattr attribute accessing should not be start with '_'\n");
       return 0;
    }
 
@@ -378,7 +379,7 @@ int inspector::inspect_build_class(PyObject* cls) {
    if (f != NULL) {
       auto it = accounts_info_map.find(current_account);
       if (it == accounts_info_map.end()) {
-         printf("+++inspect_build_class account not found!");
+         vmelog("+++inspect_build_class account not found!");
          return 0;
       }
 
@@ -388,7 +389,7 @@ int inspector::inspect_build_class(PyObject* cls) {
          info->class_objects[cls] = 1;
          return 1;
       } else {
-         printf("-----add cls to info %p, code object not in current account\n", cls);
+         vmelog("-----add cls to info %p, code object not in current account\n", cls);
       }
    }
    return 0;
@@ -399,6 +400,7 @@ int inspector::is_class_in_current_account(PyObject* cls) {
 }
 
 int inspector::add_account_function(uint64_t account, PyObject* func) {
+   vmdlog("+++++++add_account_function\n");
    auto it = accounts_info_map.find(account);
    if (it == accounts_info_map.end()) {
       auto _new_map = std::make_shared<account_info>();
@@ -411,10 +413,14 @@ int inspector::add_account_function(uint64_t account, PyObject* func) {
 }
 
 void inspector::add_code_object_to_current_account(PyCodeObject* co) {
+   vmdlog("+++++++add_code_object_to_current_account\n");
    if (!enable_create_code_object) {
       return;
    }
    auto it = accounts_info_map.find(current_account);
+   if (it == accounts_info_map.end()) {
+      return;
+   }
    it->second->code_objects[co] = 1;
 }
 
@@ -448,19 +454,24 @@ void inspector::memory_trace_stop() {
    total_used_memory = 0;
 }
 
-void inspector::memory_trace_alloc(void* ptr, size_t new_size) {
+int inspector::memory_trace_alloc(void* ptr, size_t new_size) {
    if (!enabled) {
-      return;
+      return 1;
    }
 //   memory_info_map[ptr] = std::move(_memory_info);
 //   printf("+++memory_trace_alloc:%p %d \n", ptr, new_size);
-   malloc_map[ptr] = new_size;
-   total_used_memory += new_size;
+
+   if (total_used_memory + new_size <= 2000*1024) {
+      malloc_map[ptr] = new_size;
+      total_used_memory += new_size;
+      return 1;
+   }
+   return 0;
 }
 
-void inspector::memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_size) {
+int inspector::memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_size) {
    if (!enabled) {
-      return;
+      return 1;
    }
 //   printf("+++memory_trace_realloc: %p %p %d \n", old_ptr, new_ptr, new_size);
    auto it = malloc_map.find(old_ptr);
@@ -469,8 +480,12 @@ void inspector::memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_si
       malloc_map.erase(it);
    }
 
-   malloc_map[new_ptr] = new_size;
-   total_used_memory += new_size;
+   if (total_used_memory + new_size <= 2000*1024) {
+      malloc_map[new_ptr] = new_size;
+      total_used_memory += new_size;
+      return 1;
+   }
+   return 0;
 }
 
 void inspector::memory_trace_free(void* ptr) {
@@ -493,7 +508,7 @@ int inspector::inspect_memory() {
 
 //   printf("+++total_used_memory %d \n", total_used_memory);
    if (total_used_memory >= 2000*1024) {
-      printf("+++total_used_memory %d \n", total_used_memory);
+//      printf("+++total_used_memory %d \n", total_used_memory);
    }
    return total_used_memory <= 2000*1024;
 }
@@ -602,8 +617,8 @@ void memory_trace_stop() {
    inspector::get().memory_trace_stop();
 }
 
-void memory_trace_alloc(void* ptr, size_t size) {
-   inspector::get().memory_trace_alloc(ptr, size);
+int memory_trace_alloc(void* ptr, size_t size) {
+   return inspector::get().memory_trace_alloc(ptr, size);
 }
 
 void memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_size) {
@@ -615,6 +630,7 @@ void memory_trace_free(void* ptr) {
 }
 
 int inspect_memory() {
+   return 1;
    return inspector::get().inspect_memory();
 }
 
@@ -639,6 +655,7 @@ void set_current_account(uint64_t account) {
 }
 
 int check_time() {
+   return 1;
    try {
       get_vm_api()->checktime();
    } catch (...) {

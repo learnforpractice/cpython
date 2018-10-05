@@ -74,8 +74,8 @@ public:
 
    void memory_trace_start();
    void memory_trace_stop();
-   void memory_trace_alloc(void* ptr, size_t new_size);
-   void memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_size);
+   int memory_trace_alloc(void* ptr, size_t new_size);
+   int memory_trace_realloc(void* old_ptr, void* new_ptr, size_t new_size);
    void memory_trace_free(void* ptr);
 
    int inspect_obj_creation(PyTypeObject* type);
