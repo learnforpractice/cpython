@@ -134,6 +134,7 @@ add_library( python3-ss
          Modules/timemodule.c
          Modules/xxsubtype.c
          Modules/zipimport.c
+         Modules/readline.c
 
          Objects/call.c
          Objects/abstract.c
@@ -263,9 +264,9 @@ set(PYTHON_FLAGS -DNDEBUG -DPYTHON_SS -DPy_BUILD_CORE -DPREFIX="" -DEXEC_PREFIX=
 target_compile_options(python3-ss PRIVATE $<$<COMPILE_LANGUAGE:C>:${PYTHON_FLAGS} -g -msoft-float -m64 -fwrapv -O3 -Wall -Wstrict-prototypes -std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter -Wno-missing-field-initializers> )
 
 if (APPLE)
-    target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES} intl softfloat)
+    target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES} intl softfloat -lreadline)
 else()
-    target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES} softfloat)
+    target_link_libraries( python3-ss PUBLIC ${OPENSSL_LIBRARIES} softfloat -lreadline)
 endif()
 
 add_dependencies(python3-ss python3)

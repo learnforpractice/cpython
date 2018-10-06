@@ -413,10 +413,10 @@ int inspector::add_account_function(uint64_t account, PyObject* func) {
 }
 
 void inspector::add_code_object_to_current_account(PyCodeObject* co) {
-   vmdlog("+++++++add_code_object_to_current_account\n");
    if (!enable_create_code_object) {
       return;
    }
+   vmdlog("+++++++add_code_object_to_current_account\n");
    auto it = accounts_info_map.find(current_account);
    if (it == accounts_info_map.end()) {
       return;
