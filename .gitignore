@@ -1,3 +1,4 @@
+*.wrap.cpp
 # added for local development
 dist
 .buildaix/
