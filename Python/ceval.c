@@ -4789,7 +4789,10 @@ cmp_outcome(int op, PyObject *v, PyObject *w)
     return v;
 }
 
-PyObject* vm_cpython_load_module(const char* module_name);
+#ifdef PYTHON_SS
+   PyObject* vm_cpython_load_module(const char* account_name, const char* module_name);
+   PyObject* vm_cpython_load_module_from_current_account(const char* module_name);
+#endif
 
 static PyObject *
 import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *level)
@@ -4799,21 +4802,22 @@ import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *leve
     PyObject* stack[5];
 
 #ifdef PYTHON_SS
-#if 0
-    if (!inspect_import_name(name)) {
-       PyErr_Format(PyExc_ImportError, "cannot import name %R", name);
-       return NULL;
-    }
-#endif
     {
-       const char* utf8 = PyUnicode_AsUTF8(name);
-       res = vm_cpython_load_module(utf8);
-//       printf("load module %s %p \n", utf8, res);
-       if (res != NULL) {
-          Py_INCREF(res);
-          return res;
-       }
        if (inspector_enabled()) {
+          const char* module_name = PyUnicode_AsUTF8(name);
+          res = vm_cpython_load_module_from_current_account(module_name);
+   //       printf("load module %s %p \n", module_name, res);
+          if (res != NULL) {
+             Py_INCREF(res);
+             return res;
+          }
+
+          uint64_t account_name = get_vm_api()->string_to_uint64(module_name);
+          if (get_vm_api()->is_account(account_name)) {
+             if (get_vm_api()->get_code_type(account_name) == VM_TYPE_PY) {
+                return PyModule_NewObject(name);
+             }
+          }
           PyErr_Format(PyExc_ImportError, "cannot import name %R", name);
           return NULL;
        }
@@ -4859,6 +4863,20 @@ import_from(PyObject *v, PyObject *name)
     PyObject *x;
     _Py_IDENTIFIER(__name__);
     PyObject *fullmodname, *pkgname, *pkgpath, *pkgname_or_unknown, *errmsg;
+
+#ifdef PYTHON_SS
+    {
+       pkgname = _PyObject_GetAttrId(v, &PyId___name__);
+       const char* account_name = PyUnicode_AsUTF8(pkgname);
+       const char* module_name = PyUnicode_AsUTF8(name);
+       if (account_name != NULL && module_name != NULL) {
+          x = vm_cpython_load_module(account_name, module_name);
+          if (x) {
+             return x;
+          }
+       }
+    }
+#endif
 
     if (_PyObject_LookupAttr(v, name, &x) != 0) {
         return x;
