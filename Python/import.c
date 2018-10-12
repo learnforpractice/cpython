@@ -1877,8 +1877,8 @@ PyImport_ImportModuleLevelObject(PyObject *name, PyObject *globals,
     }
 #ifdef PYTHON_SS
     {
-       const char* name = PyUnicode_AsUTF8(abs_name);
-       printf("%s\n", name);
+//       const char* name = PyUnicode_AsUTF8(abs_name);
+//       printf("%s\n", name);
     }
 #endif
     mod = PyImport_GetModule(abs_name);
