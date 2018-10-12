@@ -75,6 +75,7 @@ void debug_print(const char* str, int len);
 
 int inspector_enabled(void);
 
+int show_info(PyObject* o);
 
 #ifdef __Pyx_PyCode_New
 #undef __Pyx_PyCode_New

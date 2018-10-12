@@ -24,6 +24,7 @@ cdef extern from "inspector.h":
     void set_current_account(uint64_t account);
 
     int filter_attr(object v, object name);
+    int show_info(object o);
 
 function_whitelist = {}
 cdef extern int init_function_whitelist():
@@ -88,3 +89,15 @@ cdef extern int cy_is_class_in_current_account(object obj):
     if  current_module_name == obj.__module__:
         return 1
     return 0
+
+cdef extern int show_info(object o):
+    if isinstance(o, str):
+        print('++++show_info', o)
+    else:
+        if o is None:
+            print('none type')
+        else:
+            print(o.__name__)
+            print(type(o))
+            print(dir(o))
+    return 1
