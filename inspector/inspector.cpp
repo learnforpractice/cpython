@@ -225,6 +225,8 @@ inspector::inspector() {
    type_whitelist_map[(PyTypeObject*)PyExc_IndexError] = 1;
    type_whitelist_map[(PyTypeObject*)PyExc_BaseException] = 1;
 
+   type_whitelist_map[(PyTypeObject*)PyExc_SystemError] = 1;
+
 //   type_whitelist_map[&PyFileIO_Type] = 1; //FIXME: dangerous type
    type_whitelist_map[&PyBufferedReader_Type] = 1;
    type_whitelist_map[&PyTextIOWrapper_Type] = 1;
@@ -416,7 +418,7 @@ void inspector::add_code_object_to_current_account(PyCodeObject* co) {
    if (!enable_create_code_object) {
       return;
    }
-   vmdlog("+++++++add_code_object_to_current_account\n");
+//   vmdlog("+++++++add_code_object_to_current_account\n");
    auto it = accounts_info_map.find(current_account);
    if (it == accounts_info_map.end()) {
       return;

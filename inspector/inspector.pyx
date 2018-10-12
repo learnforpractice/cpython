@@ -25,6 +25,7 @@ cdef extern from "inspector.h":
 
     int filter_attr(object v, object name);
     int show_info(object o);
+    int show_error(object o);
 
 function_whitelist = {}
 cdef extern int init_function_whitelist():
@@ -97,7 +98,27 @@ cdef extern int show_info(object o):
         if o is None:
             print('none type')
         else:
-            print(o.__name__)
             print(type(o))
             print(dir(o))
+            print(o)
+            print(o.__name__)
+    return 1
+
+
+cdef extern int show_error(object o):
+    print('+++++++++++++show_error\n')
+#    print(o)
+    if isinstance(o, str):
+        print('++++show_error', o)
+    elif isinstance(o, Exception):
+        print('+++exception:', o.msg)
+    else:
+        return 0
+        if o is None:
+            print('none type')
+        else:
+            print(type(o))
+            print(dir(o))
+            print(o)
+            print(o.__name__)
     return 1

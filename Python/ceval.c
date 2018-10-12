@@ -4864,23 +4864,6 @@ import_from(PyObject *v, PyObject *name)
     _Py_IDENTIFIER(__name__);
     PyObject *fullmodname, *pkgname, *pkgpath, *pkgname_or_unknown, *errmsg;
 
-#ifdef PYTHON_SS
-    {
-       pkgname = _PyObject_GetAttrId(v, &PyId___name__);
-       if (pkgname != NULL) {
-          const char* account_name = PyUnicode_AsUTF8(pkgname);
-          const char* module_name = PyUnicode_AsUTF8(name);
-          printf("import_from: %s %s \n", account_name, module_name);
-          if (account_name != NULL && module_name != NULL) {
-             x = vm_cpython_load_module(account_name, module_name);
-             if (x) {
-                return x;
-             }
-          }
-       }
-    }
-#endif
-
     if (_PyObject_LookupAttr(v, name, &x) != 0) {
         return x;
     }
@@ -4895,6 +4878,24 @@ import_from(PyObject *v, PyObject *name)
         Py_CLEAR(pkgname);
         goto error;
     }
+
+#ifdef PYTHON_SS
+    if (inspector_enabled())
+    {
+       const char* account_name = PyUnicode_AsUTF8(pkgname);
+       const char* module_name = PyUnicode_AsUTF8(name);
+//          printf("import_from: %s %s \n", account_name, module_name);
+       if (account_name != NULL && module_name != NULL) {
+          x = vm_cpython_load_module(account_name, module_name);
+          if (x != Py_None) {
+             Py_DECREF(pkgname);
+             return x;
+          }
+       }
+    }
+#endif
+
+
     fullmodname = PyUnicode_FromFormat("%U.%U", pkgname, name);
     if (fullmodname == NULL) {
         Py_DECREF(pkgname);
