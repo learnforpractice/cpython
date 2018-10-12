@@ -4867,12 +4867,15 @@ import_from(PyObject *v, PyObject *name)
 #ifdef PYTHON_SS
     {
        pkgname = _PyObject_GetAttrId(v, &PyId___name__);
-       const char* account_name = PyUnicode_AsUTF8(pkgname);
-       const char* module_name = PyUnicode_AsUTF8(name);
-       if (account_name != NULL && module_name != NULL) {
-          x = vm_cpython_load_module(account_name, module_name);
-          if (x) {
-             return x;
+       if (pkgname != NULL) {
+          const char* account_name = PyUnicode_AsUTF8(pkgname);
+          const char* module_name = PyUnicode_AsUTF8(name);
+          printf("import_from: %s %s \n", account_name, module_name);
+          if (account_name != NULL && module_name != NULL) {
+             x = vm_cpython_load_module(account_name, module_name);
+             if (x) {
+                return x;
+             }
           }
        }
     }
