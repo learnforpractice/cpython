@@ -4805,19 +4805,21 @@ import_name(PyFrameObject *f, PyObject *name, PyObject *fromlist, PyObject *leve
     {
        if (inspector_enabled()) {
           const char* module_name = PyUnicode_AsUTF8(name);
-          res = vm_cpython_load_module_from_current_account(module_name);
-   //       printf("load module %s %p \n", module_name, res);
-          if (res != NULL) {
-             Py_INCREF(res);
-             return res;
-          }
 
           uint64_t account_name = get_vm_api()->string_to_uint64(module_name);
           if (get_vm_api()->is_account(account_name)) {
              if (get_vm_api()->get_code_type(account_name) == VM_TYPE_PY) {
                 return PyModule_NewObject(name);
+//                return get_account_module(name);
              }
           }
+
+          res = vm_cpython_load_module_from_current_account(module_name);
+//          printf("load module %s %p \n", module_name, res);
+          if (res != NULL) {
+             return res;
+          }
+
           PyErr_Format(PyExc_ImportError, "cannot import name %R", name);
           return NULL;
        }
@@ -4884,7 +4886,7 @@ import_from(PyObject *v, PyObject *name)
     {
        const char* account_name = PyUnicode_AsUTF8(pkgname);
        const char* module_name = PyUnicode_AsUTF8(name);
-//          printf("import_from: %s %s \n", account_name, module_name);
+//       vmdlog("import_from: %s %s \n", account_name, module_name);
        if (account_name != NULL && module_name != NULL) {
           x = vm_cpython_load_module(account_name, module_name);
           if (x != Py_None) {
