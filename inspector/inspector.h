@@ -77,6 +77,10 @@ int inspector_enabled(void);
 
 int show_info(PyObject* o);
 int show_error(PyObject* o);
+void swith_to_mainstate();
+
+PyObject* get_account_module(PyObject* name);
+
 
 #ifdef __Pyx_PyCode_New
 #undef __Pyx_PyCode_New

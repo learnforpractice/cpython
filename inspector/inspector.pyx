@@ -26,6 +26,13 @@ cdef extern from "inspector.h":
     int filter_attr(object v, object name);
     int show_info(object o);
     int show_error(object o);
+    void swith_to_mainstate();
+
+
+    cdef cppclass vm_api:
+        int (*vm_apply)(int type, uint64_t receiver, uint64_t account, uint64_t act);
+
+    vm_api* get_vm_api();
 
 function_whitelist = {}
 cdef extern int init_function_whitelist():
@@ -50,6 +57,9 @@ cdef extern int init_function_whitelist():
 
 current_module = None
 current_module_name = None
+
+def enable(e):
+    enable_injected_apis(e)
 
 def add_function_to_whitelist(func):
 #    print('+++++++++++=add_function_to_white_list:', func)
@@ -122,3 +132,19 @@ cdef extern int show_error(object o):
             print(o)
             print(o.__name__)
     return 1
+
+def vm_apply(int type, uint64_t receiver, uint64_t account, uint64_t act):
+    ret = get_vm_api()[0].vm_apply( type, receiver, account, act)
+    swith_to_mainstate()
+    return ret
+
+modules = {}
+cdef extern object get_account_module(object name):
+    if name in modules:
+        print('get module from cache: ', name)
+        return modules[name]
+    mod = type(db)(name)
+    modules[name] = mod
+    return mod
+
+
