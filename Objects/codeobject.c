@@ -110,7 +110,7 @@ PyCode_New(int argcount, int kwonlyargcount,
 
 #ifdef PYTHON_SS
     if (!is_create_code_object_enabled()) {
-       PyErr_Format(PyExc_RuntimeError, "create new code object does not allowed %R", name);
+       PyErr_Format(PyExc_RuntimeError, "Creating new code object does not allowed %R", name);
        return NULL;
     }
 #endif
