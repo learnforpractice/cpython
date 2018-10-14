@@ -1584,6 +1584,7 @@ static PyMethodDef sys_methods[] = {
 
 static PyMethodDef sys_methods2[] = {
       {"excepthook",      sys_excepthook, METH_VARARGS, excepthook_doc},
+      {"displayhook",     sys_displayhook, METH_O, displayhook_doc},
       {NULL,              NULL}           /* sentinel */
 };
 
