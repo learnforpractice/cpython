@@ -61,6 +61,9 @@ current_module_name = None
 def enable(e):
     enable_injected_apis(e)
 
+def enable_code_object(e):
+    enable_create_code_object(e)
+
 def add_function_to_whitelist(func):
 #    print('+++++++++++=add_function_to_white_list:', func)
     function_whitelist[func] = True
