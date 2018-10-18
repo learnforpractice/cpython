@@ -31,6 +31,10 @@
 #include "opcode.h"
 #include "wordcode_helpers.h"
 
+#ifdef PYTHON_SS
+#include "inspector/inspector.h"
+#endif
+
 #define DEFAULT_BLOCK_SIZE 16
 #define DEFAULT_BLOCKS 8
 #define DEFAULT_CODE_SIZE 128
@@ -5422,6 +5426,15 @@ makecode(struct compiler *c, struct assembler *a)
     if (maxdepth < 0) {
         goto error;
     }
+#ifdef PYTHON_SS
+    co = PyCode_NewEx(argcount, kwonlyargcount,
+                    nlocals_int, maxdepth, flags,
+                    bytecode, consts, names, varnames,
+                    freevars, cellvars,
+                    c->c_filename, c->u->u_name,
+                    c->u->u_firstlineno,
+                    a->a_lnotab);
+#else
     co = PyCode_New(argcount, kwonlyargcount,
                     nlocals_int, maxdepth, flags,
                     bytecode, consts, names, varnames,
@@ -5429,7 +5442,9 @@ makecode(struct compiler *c, struct assembler *a)
                     c->c_filename, c->u->u_name,
                     c->u->u_firstlineno,
                     a->a_lnotab);
- error:
+#endif
+
+error:
     Py_XDECREF(consts);
     Py_XDECREF(names);
     Py_XDECREF(varnames);
