@@ -34,7 +34,7 @@ add_custom_command(
     OUTPUT ${PYTHON_LIB}
     COMMAND OPENSSL_ROOT=${OPENSSL_ROOT};make ${BUILD_FLAGS}
     COMMAND make install
-    COMMAND LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install cython
+    COMMAND LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install cython==0.28.5
     COMMAND LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/dist/bin/python3 -m pip install ptvsd==3.0.0
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "making python3.7"
